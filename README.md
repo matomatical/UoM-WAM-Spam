@@ -39,6 +39,6 @@ Finally, you probably want to run the script periodically. When executed from wi
 results/ $ bash run.sh > output.txt &
 results/ $ disown %J
 ```
-where J is the job number shown when you background sh run.sh
+where J is the job number shown when you background `bash run.sh`
 
 > Note: don't forget to stop it after all final results release date! In bash, you can `kill` a disowned script using its process ID, which can be found using `ps -x`. Make sure you use the ID of `bash run.sh`, not `sleep 300` or `python main.py`.
