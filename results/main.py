@@ -16,9 +16,7 @@ from email.mime.text import MIMEText
 def main():
 
 	# get login details from configuration file
-	with open("login.txt") as f:
-		username = f.readline().strip()
-		password = f.readline().strip()
+	username, password = get_username_password("login.txt")
 
 	# login to results page and get its source
 	source = get_results(username, password)
@@ -105,9 +103,7 @@ def send_results(target, subject, message):
 	"""log in to gmail as the results robot, and send an email to the target"""
 
 	# what are the results robot's authentication details?
-	with open("email.txt") as f:
-		username = f.readline().strip()
-		password = f.readline().strip()
+	username, password = get_username_password("email.txt")
 
 	sender = username + "@gmail.com"
 	
@@ -125,6 +121,9 @@ def send_results(target, subject, message):
 	s.quit()
 
 def get_username_password(filename):
-	
+	with open(filename) as f:
+		username = f.readline().strip()
+		password = f.readline().strip()
+	return (username, password)
 
 if __name__ == '__main__': main()

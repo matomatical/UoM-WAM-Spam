@@ -6,6 +6,25 @@ By Matt Farrugia
 
 ## Dependencies
 
-Requires python modules [Beautiful Soup](https://www.crummy.com/software/BeautifulSoup/) and [Selenium](http://docs.seleniumhq.org/). You can install these dependencies using ```pip install -r path/to/repo/requirements.txt```.
+Requires python modules [Beautiful Soup](https://www.crummy.com/software/BeautifulSoup/) and [Selenium](http://docs.seleniumhq.org/). You can install these dependencies using `pip install -r path/to/repo/requirements.txt`.
 
 Selenium requires headless browser [PhantomJS](http://phantomjs.org/) to be installed and on the path.
+
+## Usage
+
+The results-checking script needs two files to be placed within the **/results** directory: **login.txt** and **email.txt**. **login.txt** should contain your student username on the first line, followed by your student password on the second line. An example **login.txt** file would be:
+
+```
+farrugiam
+pAS5w0rd!1
+```
+
+**email.txt** uses the same structure, but should contain the gmail username of the account you want to use to email the results, and its gmail password on the second line. An example **email.txt** file for the gmail address `results.robot@gmail.com` would be:
+
+```
+results.robot
+pAS5w0rd!1
+```
+
+> Note: only the part of the email address before the `@gmail.com` is included in the file.
+
