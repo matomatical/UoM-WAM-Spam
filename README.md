@@ -31,3 +31,14 @@ pAS5w0rd!1
 > Note: only the part of the email address before the `@gmail.com` is included in the file.
 
 After these files have been added to the **results** directory, you should be able to run the script from within that directory with `python main.py`. If the WAM on your results page is different from the number in **results/wam.txt**, you'll receive an email at `username@student.unimelb.edu.au` where `username` is the name in the first line of **results/login.txt**.
+
+
+Finally, you probably want to run the script periodically. When executed from within the **results** directory, the bash script **results/run.sh** will run **main.py** forever, pausing inbetween for 300 seconds. So, you should be able to run, background and disown the script to have it run forever:
+
+```
+results/ $ sh run.sh > output.txt &
+results/ $ disown %J
+```
+where J is the job number shown when you background sh run.sh
+
+> Note: don't forget to stop it after all final results release date! In bash, you can `kill` a disowned script using its process ID, which can be found using `ps -x`. Make sure you use the ID of `sh run.sh`, not `sleep` or `python`.
