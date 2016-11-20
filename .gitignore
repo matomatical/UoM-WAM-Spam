@@ -1,2 +1,4 @@
-email.txt
-login.txt
+results/email.txt
+results/login.txt
+**/*.pyc
+**/*.log
