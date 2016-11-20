@@ -6,9 +6,11 @@ By Matt Farrugia
 
 ## Dependencies
 
-Requires python modules [Beautiful Soup](https://www.crummy.com/software/BeautifulSoup/) and [Selenium](http://docs.seleniumhq.org/). You can install these dependencies with [pip](https://pypi.python.org/pypi/pip) using `pip install -r path/to/repo/requirements.txt`.
+Requires python modules [Beautiful Soup](https://www.crummy.com/software/BeautifulSoup/), [html5lib](https://github.com/html5lib/), and [Selenium](http://docs.seleniumhq.org/). You can install these dependencies with [pip](https://pypi.python.org/pypi/pip) using `pip install -r path/to/repo/requirements.txt`.
 
-Selenium requires headless browser [PhantomJS](http://phantomjs.org/) to be installed and on the path.
+Selenium requires headless browser [PhantomJS](http://phantomjs.org/) to be installed and on the path, so make sure `phantomjs` runs before you proceed.
+
+> Note: I ran into some trouble using the version of phantomjs installed with `apt install phantomjs`, and needed to download the binary directly from the website linked above.
 
 ## Usage
 
