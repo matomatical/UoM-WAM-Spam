@@ -33,7 +33,7 @@ pAS5w0rd!1
 After these files have been added to the **results** directory, you should be able to run the script from within that directory with `python main.py`. If the WAM on your results page is different from the number in **results/wam.txt**, you'll receive an email at `username@student.unimelb.edu.au` where `username` is the name in the first line of **results/login.txt**.
 
 
-Finally, you probably want to run the script periodically. When executed from within the **results** directory, the bash script **results/run.sh** will run **main.py** forever, pausing inbetween for 300 seconds. So, you should be able to run, background and disown the script to have it run forever:
+Finally, you probably want to run the script periodically. When executed from within the **results** directory, the bash script **results/run.sh** will run **main.py** forever, pausing for 300 seconds between each run. So, you should be able to run, background and disown the script to have it run forever:
 
 ```
 results/ $ bash run.sh > output.txt &
