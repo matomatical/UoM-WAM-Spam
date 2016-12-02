@@ -10,7 +10,7 @@ Requires python modules [Beautiful Soup](https://www.crummy.com/software/Beautif
 
 Selenium requires headless browser [PhantomJS](http://phantomjs.org/) to be installed and on the path, so make sure `phantomjs` runs before you proceed.
 
-> Note: I ran into some trouble using the version of phantomjs installed with `apt install phantomjs`, and needed to download the binary directly from the website linked above.
+> Note: I ran into some trouble using the version of phantomjs installed with `apt install phantomjs`, and needed to download the binary directly from the website linked above. Without a gui this involved `wget`, `bzip2`, `tar` and `cp`.
 
 ## Usage
 
