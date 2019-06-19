@@ -35,28 +35,48 @@ WAM_FILENAME = "wam.txt"
 # WEB SCRAPING CONFIGURATION
 #
 
-# if you have multiple degrees, set this to the id of the degree with the WAM 
+# if you have multiple degrees, set this to the id of the degree with the WAM
 # you want the script to watch (0, 1, 2, ... based on order from results page).
 # If you only have a single degree, then set it to None.
 # DEGREE_INDEX = 0
 DEGREE_INDEX = None
 
-# now, choose your web driver:
 
-# after the deprecation of PhantomJS, the options are pretty much firefox or 
-# google chrome. obviously we'll choose firefox (you don't use chrome, do you?)
-DRIVER = webdriver.Firefox
+# now, choose your web browser and driver:
 
-# you'll also need to install the actual driver program. for firefox, it's 
-# called `geckodriver`, and your package manager (e.g. brew) might have it,
-# or just download the right version for your platform from the github page: 
-# https://github.com/mozilla/geckodriver/releases and put it in the working 
-# directory, or put it on your path (and remove the `./` from the line below)
-DRIVER_EXEPATH = "./geckodriver"
+# after the deprecation of phantomjs, the options are pretty much firefox or
+# google chrome/chromium. I found chromium uses less memory, but you can use
+# whichever you prefer. Make sure you have the corresponding browser installed
+# on your system!
+# DRIVER = webdriver.Firefox # For Mozilla Firefox
+DRIVER = webdriver.Chrome # For Chromium or Google Chrome
 
-# we probably want the web driver to run in headless mode (no display/GUI)
-DRIVER_OPTIONS = webdriver.firefox.options.Options()
-DRIVER_OPTIONS.headless = True
+# you'll also need to install and hook up the actual driver program, and
+# configure some options:
+if DRIVER is webdriver.Firefox:
+    # for firefox, it's called `geckodriver`, and your package manager (e.g.
+    # brew) might have it, or just download the right version for your platform
+    # from here: https://github.com/mozilla/geckodriver/releases and put it in
+    # the working directory, or put it on your path (and remove the `./` from
+    # the line below)
+    DRIVER_EXEPATH = "./geckodriver"
+
+    # we probably want the web driver to run in headless mode (no display/GUI)
+    DRIVER_OPTIONS = webdriver.firefox.options.Options()
+    DRIVER_OPTIONS.headless = True
+
+if DRIVER is webdriver.Chrome:
+    # for chrome(ium), it's called `chromedriver`, and you'll need the right
+    # version for you platform and chrome version. you can probably find it
+    # here: https://sites.google.com/a/chromium.org/chromedriver/downloads
+    # like geckodriver, just put it in your workind directory or on your path
+    # and configure this path accordingly so that the script can find it:
+    DRIVER_EXEPATH = "./chromedriver"
+
+    # we probably want the web driver to run in headless mode (no display/GUI)
+    DRIVER_OPTIONS = webdriver.chrome.options.Options
+    DRIVER_OPTIONS.headless = True
+
 
 # # #
 # EMAIL CONFIGURATION
@@ -71,7 +91,7 @@ SUBJECT = "WAM Update Detected"
 EMAIL_TEMPLATE = """Hey there!
 {message}
 Love,
-Results Robot
+WAM Spammer
 """
 INCREASE_MESSAGE_TEMPLATE = """
 I noticed that your WAM increased from {before} to {after}.
@@ -184,6 +204,8 @@ def scrape_wam(username=UNIMELB_USERNAME, password=UNIMELB_PASSWORD):
             d.execute_script(
                 f"javascript:__doPostBack('ctl00$Content$grdResultPlans',"
                 f"'ViewResults${DEGREE_INDEX}')")
+        else:
+            print("Expecting not to find multiple degrees.")
         
         # now we can try to find the WAM text itself within this results page
         try:
@@ -220,7 +242,7 @@ def email_self(subject, text, address=EMAIL_ADDRESS, password=EMAIL_PASSWORD):
     # make the email object
     msg = MIMEText(text)
     msg['To'] = address
-    msg['From'] = address
+    msg['From'] = f"WAM Spammer <{address}>"
     msg['Subject'] = subject
 
     # log into the unimelb student email SMTP server (gmail) to send it

@@ -14,9 +14,13 @@ Requires:
 * [Python 3.6](https://www.python.org/) (or higher).
 * [Selenium](http://docs.seleniumhq.org/), a third-party web automation library. 
     * Easily install with [pip](https://pypi.python.org/pypi/pip) using `pip install -r requirements.txt`.
-* An automatable web browser and a driver program, such as Firefox and [geckodriver](https://github.com/mozilla/geckodriver).
-    * Your package manager (e.g. homebrew) might have geckodriver, or you can just download the right version for your platform from [the releases page](https://github.com/mozilla/geckodriver/releases) and put it in the directory you are running the script from.
-    * For this to work, you'll also need Firefox itself to be installed! It should also be pretty simple to use ChromeDriver if you use Google Chrome rather than Firefox, but I haven't looked into it. You'll need to reconfigure the script to use a different browser wrapper and driver executable. Also, you should probably stop using Google Chrome when you get a chance.
+* An automatable web browser and a driver program, which can be either:
+    * Firefox and [geckodriver](https://github.com/mozilla/geckodriver).
+        * You can install Firefox through the usual means. As for geckodriver, your package manager (e.g. homebrew, apt) might have it, or you can just download the right version for your platform from [the releases page](https://github.com/mozilla/geckodriver/releases) and put it in the directory you are running the script from.
+    * Chromium (or Google Chrome) and [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/).
+        * You can install Chromium through the usual means. As for ChromeDriver, it's probably easiest to download the relevant version for your platform/Chrome(ium) version from the [downloads page](https://sites.google.com/a/chromium.org/chromedriver/downloads) and place it in the directory you are running the script from.
+
+    Once you choose a browser, you'll need to configure the script with your choice and tell it where to find the driver executable you installed. See below.
 
 
 ## Configuration
@@ -25,12 +29,12 @@ While the script has sensible default settings, it's also easily configurable. Y
 
 * `DEGREE_INDEX`: **This one's important!** If you have multiple degrees, then you need oto tell the script which degree's WAM you want it to monitor. Just specify a (zero-based) index into the list of degrees on your results page (0 for the top degree in the list, 1 for the second, and so on). If you only have a single degree, just leave the value as `None`.
 
-* `DRIVER_EXEPATH`: Depending on how you install geckodriver, you may need to change the `DRIVER_EXEPATH` setting:
-    * If you downloaded the executable and put it in the directory you are running the script from, leave it as `"./geckodriver"`.
+* `DRIVER`: **This one's also important!** You're going to want to set it to either `DRIVER = webdriver.Firefox` or `DRIVER = webdriver.Chrome` (for Chromium/Google Chrome). Make sure you also have the correponding browser installed on your system, of course.
+
+* `DRIVER_EXEPATH`: Depending on how you install the driver (geckodriver or chromedriver), you may need to change the relevant `DRIVER_EXEPATH` setting for your choice of browser:
+    * If you downloaded the executable and put it in the directory you are running the script from, leave it as `"./geckodriver"`/`"./chromedriver"`.
     * If you put the executable somewhere else, set a relative or absolute filepath accordingly.
-    * If you installed geckodriver into your system path, change this variable to `"geckodriver"`.
-    
-    If you chose to go with ChromeDriver then you'll have to change this variable (and also `DRIVER` and probably `DRIVER_OPTIONS`) to something else.
+    * If you installed the driver into your system path, change the value to `"geckodriver"`/`"chromedriver"`.
 
 * `CHECK_REPEATEDLY`: By default, the script will repeatedly check your WAM until you kill it. If you want the script to check your WAM only once, set this to `False`.
 
@@ -54,7 +58,7 @@ The script is not very robust. If anything goes wrong, it will probably crash wi
 
 > While the script is setting up the web driver, it crashed with an error: `selenium.common.exceptions.SessionNotCreatedException: Message: Unable to find a matching set of capabilities`
 
-Don't forget to install Firefox!
+Don't forget, you need to have the relevant browser installed (Firefox or Chromium/Google Chrome, depending on how you configured the `DRIVER` variable)!
 
 
 > The script fails to find my WAM, then crashes with an error: `selenium.common.exceptions.NoSuchElementException: Message: Unable to locate element: [id="ctl00_LogoutLinkButton"]`.
@@ -66,4 +70,4 @@ You might have types your username or password wrong. Please check that you got 
 
 Does your results page contain results for multiple degrees? You might not have configured `DEGREE_INDEX` correctly! Try setting it to `0` instead of `None`.
 
-If that doesn't fix the problem, you could watch the script trying to find your WAM by setting `DRIVER_OPTIONS.headless = False`.
+If that doesn't fix it, you could watch the script trying to find your WAM by setting `DRIVER_OPTIONS.headless = False`, and see if something else might be causing the problem.
