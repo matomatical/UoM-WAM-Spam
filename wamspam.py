@@ -159,7 +159,7 @@ def scrape_wam(username=UNIMELB_USERNAME, password=UNIMELB_PASSWORD):
     # load up the browser
     print("Setting up the web driver")
     with DRIVER(options=DRIVER_OPTIONS, executable_path=DRIVER_EXEPATH) as d:
-        # d.set_window_size(1120, 550)
+        d.set_window_size(1120, 550)
         d.implicitly_wait(5) # seconds
         
         # go to the results page and login with the provided username and 
@@ -187,8 +187,8 @@ def scrape_wam(username=UNIMELB_USERNAME, password=UNIMELB_PASSWORD):
         
         # now we can try to find the WAM text itself within this results page
         try:
-            wam_para = d.find_element_by_class_name("UMWAMText")
             print("Extracting WAM")
+            wam_para = d.find_element_by_class_name("UMWAMText")
             wam_text = wam_para.find_element_by_tag_name("b").text
         except NoSuchElementException:
             print("Couldn't find WAM (no WAM yet, or page load timed out)")

@@ -14,9 +14,9 @@ Requires:
 * [Python 3.6](https://www.python.org/) (or higher).
 * [Selenium](http://docs.seleniumhq.org/), a third-party web automation library. 
     * Easily install with [pip](https://pypi.python.org/pypi/pip) using `pip install -r requirements.txt`.
-* A web driver such as Firefox's [geckodriver](https://github.com/mozilla/geckodriver) (enabling Selenium to browse the web for you).
+* An automatable web browser and a driver program, such as Firefox and [geckodriver](https://github.com/mozilla/geckodriver).
     * Your package manager (e.g. homebrew) might have geckodriver, or you can just download the right version for your platform from [the releases page](https://github.com/mozilla/geckodriver/releases) and put it in the directory you are running the script from.
-    * It should also be pretty simple to use ChromeDriver if you use Google Chrome rather than Firefox. You'll need to reconfigure the script to use a different browser wrapper (see below). Also, you should probably stop using Google Chrome.
+    * For this to work, you'll also need Firefox itself to be installed! It should also be pretty simple to use ChromeDriver if you use Google Chrome rather than Firefox, but I haven't looked into it. You'll need to reconfigure the script to use a different browser wrapper and driver executable. Also, you should probably stop using Google Chrome when you get a chance.
 
 
 ## Configuration
@@ -42,8 +42,28 @@ There are other configuration options, all documented in the script itself.
 
 Once you have installed the requirements and configured the script, simply run it with `python3 wamspam.py`.
 
-The script will ask you for your unimelb username and password. It uses these to log into the results page on your behalf every however-many minutes you configured, looking for your WAM. It stores the previous WAM in a text file in-between checks, for comparison.
+The script will ask you for your unimelb username and password. It uses these to log into the results page on your behalf every however-many minutes you configured, looking for your WAM (if you want to watch it, try setting . It stores the previous WAM in a text file in-between checks, for comparison.
 
 The first time the script finds your WAM, or whenever it sees your WAM change, the script will also log in to your university email and send you a self-email notifying you about the WAM change.
 
 > Note: Don't forget to stop the script after the final results release date!
+
+### Common issues
+
+The script is not very robust. If anything goes wrong, it will probably crash with an overly dramatic error message. Please see these possible errors:
+
+> While the script is setting up the web driver, it crashed with an error: `selenium.common.exceptions.SessionNotCreatedException: Message: Unable to find a matching set of capabilities`
+
+Don't forget to install Firefox!
+
+
+> The script fails to find my WAM, then crashes with an error: `selenium.common.exceptions.NoSuchElementException: Message: Unable to locate element: [id="ctl00_LogoutLinkButton"]`.
+
+You might have types your username or password wrong. Please check that you got them right, and try again. You can watch the script trying to find your WAM by setting `DRIVER_OPTIONS.headless = False`.
+
+
+> The script never finds my WAM! It just says `Couldn't find WAM (no WAM yet, or page load timed out)` every time.
+
+Does your results page contain results for multiple degrees? You might not have configured `DEGREE_INDEX` correctly! Try setting it to `0` instead of `None`.
+
+If that doesn't fix the problem, you could watch the script trying to find your WAM by setting `DRIVER_OPTIONS.headless = False`.
