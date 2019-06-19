@@ -38,7 +38,8 @@ WAM_FILENAME = "wam.txt"
 # if you have multiple degrees, set this to the id of the degree with the WAM 
 # you want the script to watch (0, 1, 2, ... based on order from results page).
 # If you only have a single degree, then set it to None.
-DEGREE_INDEX = 0
+# DEGREE_INDEX = 0
+DEGREE_INDEX = None
 
 # now, choose your web driver:
 

@@ -1,4 +1,4 @@
-# UoM Results Checker
+# UoM WAM Spam
 
 The official results release date is usually about two weeks after the end of the exam period. In practice, subject marks become visible a week or two earlier than the official release date, and can be inferred even earlier by detecting a change in calculated WAM (Weighted Average Mark) as soon as the results are in the system (days before the results themselves are made visible on the results page).
 
@@ -21,7 +21,7 @@ Requires:
 
 ## Configuration
 
-While the script has sensible default settings, it's also easily configurable. You can modify the constants atop `checkresults/checkresults.py` to easily change the behaviour. Some important configuration options are:
+While the script has sensible default settings, it's also easily configurable. You can modify the constants atop `wamspam.py` to easily change the behaviour. Some important configuration options are:
 
 * `DEGREE_INDEX`: This one's important! If you have multiple degrees, then you need oto tell the script which degree's WAM you want it to monitor. Just specify a (zero-based) index into the list of degrees on your results page (0 for the top degree in the list, 1 for the second, and so on). If you only have a single degree, just leave the value as `None`.
 
@@ -40,7 +40,7 @@ There are other configuration options, all documented in the script itself.
 
 ## Usage
 
-Once you have installed the requirements and configured the script, simply run it with `python3 checkresults/checkresults.py`.
+Once you have installed the requirements and configured the script, simply run it with `python3 wamspam.py`.
 
 The script will ask you for your unimelb username and password. It uses these to log into the results page on your behalf every however-many minutes you configured, looking for your WAM. It stores the previous WAM in a text file in-between checks, for comparison.
 
