@@ -23,7 +23,7 @@ Requires:
 
 While the script has sensible default settings, it's also easily configurable. You can modify the constants atop `wamspam.py` to easily change the behaviour. Some important configuration options are:
 
-* `DEGREE_INDEX`: This one's important! If you have multiple degrees, then you need oto tell the script which degree's WAM you want it to monitor. Just specify a (zero-based) index into the list of degrees on your results page (0 for the top degree in the list, 1 for the second, and so on). If you only have a single degree, just leave the value as `None`.
+* `DEGREE_INDEX`: **This one's important!** If you have multiple degrees, then you need oto tell the script which degree's WAM you want it to monitor. Just specify a (zero-based) index into the list of degrees on your results page (0 for the top degree in the list, 1 for the second, and so on). If you only have a single degree, just leave the value as `None`.
 
 * `DRIVER_EXEPATH`: Depending on how you install geckodriver, you may need to change the `DRIVER_EXEPATH` setting:
     * If you downloaded the executable and put it in the directory you are running the script from, leave it as `"./geckodriver"`.
