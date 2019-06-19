@@ -1,4 +1,4 @@
-results/email.txt
-results/login.txt
-**/*.pyc
-**/*.log
+__pycache__
+*driver.log
+*driver
+wam.txt

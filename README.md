@@ -1,44 +1,49 @@
-# Unimelb Results Checker
+# UoM Results Checker
 
-Periodically checks my.unimelb results page for new results and sends an email when new results are posted.
+The official results release date is usually about two weeks after the end of the exam period. In practice, subject marks become visible a week or two earlier than the official release date, and can be inferred even earlier by detecting a change in calculated WAM (Weighted Average Mark) as soon as the results are in the system (days before the results themselves are made visible on the results page).
 
-By Matt Farrugia
+This script periodically checks the my.unimelb results page to detect any changes to your WAM, and sends you an email when a change is detected. If you run this script in the background on your computer or on a VPS, you'll be free to enjoy the first few weeks of your holidays without compulsively checking the results page yourself! Or is it just me who does that?
+
+Made with :purple-heart: by Matt
+
 
 ## Dependencies
 
-Requires python modules [Beautiful Soup](https://www.crummy.com/software/BeautifulSoup/), [html5lib](https://github.com/html5lib/), and [Selenium](http://docs.seleniumhq.org/). You can install these dependencies with [pip](https://pypi.python.org/pypi/pip) using `pip install -r path/to/repo/requirements.txt`.
+Requires:
 
-Selenium requires headless browser [PhantomJS](http://phantomjs.org/) to be installed and on the path, so make sure `phantomjs` runs before you proceed.
+* [Python 3.6](https://www.python.org/) (or higher).
+* [Selenium](http://docs.seleniumhq.org/), a third-party web automation library. 
+    * Easily install with [pip](https://pypi.python.org/pypi/pip) using `pip install -r requirements.txt`.
+* A web driver such as Firefox's [geckodriver](https://github.com/mozilla/geckodriver) (enabling Selenium to browse the web for you).
+    * Your package manager (e.g. homebrew) might have geckodriver, or you can just download the right version for your platform from [the releases page](https://github.com/mozilla/geckodriver/releases) and put it in the directory you are running the script from.
+    * It should also be pretty simple to use ChromeDriver if you use Google Chrome rather than Firefox. You'll need to reconfigure the script to use a different browser wrapper (see below). Also, you should probably stop using Google Chrome.
 
-> Note: I ran into some trouble using the version of phantomjs installed with `apt install phantomjs`, and needed to download the binary directly from the website linked above.
+
+## Configuration
+
+While the script has sensible default settings, it's also easily configurable. You can modify the constants atop `checkresults/checkresults.py` to easily change the behaviour. Some important configuration options are:
+
+* `DEGREE_INDEX`: This one's important! If you have multiple degrees, then you need oto tell the script which degree's WAM you want it to monitor. Just specify a (zero-based) index into the list of degrees on your results page (0 for the top degree in the list, 1 for the second, and so on). If you only have a single degree, just leave the value as `None`.
+
+* `DRIVER_EXEPATH`: Depending on how you install geckodriver, you may need to change the `DRIVER_EXEPATH` setting:
+    * If you downloaded the executable and put it in the directory you are running the script from, leave it as `"./geckodriver"`.
+    * If you put the executable somewhere else, set a relative or absolute filepath accordingly.
+    * If you installed geckodriver into your system path, change this variable to `"geckodriver"`.
+    
+    If you chose to go with ChromeDriver then you'll have to change this variable (and also `DRIVER` and probably `DRIVER_OPTIONS`) to something else.
+
+* `CHECK_REPEATEDLY`: By default, the script will repeatedly check your WAM until you kill it. If you want the script to check your WAM only once, set this to `False`.
+
+* `DELAY_BETWEEN_CHECKS`: You can configure how often the script logs in to check for results. I had mine set to check every 5 minutes (roughly the frequency at which I would be checking if it wasn't for this script). That seemed a bit excessive, so I changed it to check every hour. I'll probably speed it up when the results release date draws closer.
+
+There are other configuration options, all documented in the script itself.
 
 ## Usage
 
-The results-checking script needs two files to be placed within the **results** directory: **login.txt** and **email.txt**. **login.txt** should contain your student username on the first line, followed by your student password on the second line. An example **login.txt** file would be:
+Once you have installed the requirements and configured the script, simply run it with `python3 checkresults/checkresults.py`.
 
-```
-farrugiam
-pAS5w0rd!1
-```
+The script will ask you for your unimelb username and password. It uses these to log into the results page on your behalf every however-many minutes you configured, looking for your WAM. It stores the previous WAM in a text file in-between checks, for comparison.
 
-**email.txt** uses the same structure, but should contain the gmail username of the account you want to use to email the results, and its gmail password on the second line. An example **email.txt** file for the gmail address `results.robot@gmail.com` would be:
+The first time the script finds your WAM, or whenever it sees your WAM change, the script will also log in to your university email and send you a self-email notifying you about the WAM change.
 
-```
-results.robot
-pAS5w0rd!1
-```
-
-> Note: only the part of the email address before the `@gmail.com` is included in the file.
-
-After these files have been added to the **results** directory, you should be able to run the script from within that directory with `python main.py`. If the WAM on your results page is different from the number in **results/wam.txt**, you'll receive an email at `username@student.unimelb.edu.au` where `username` is the name in the first line of **results/login.txt**.
-
-
-Finally, you probably want to run the script periodically. When executed from within the **results** directory, the bash script **results/run.sh** will run **main.py** forever, pausing for 300 seconds between each run. So, you should be able to run, background and disown the script to have it run forever:
-
-```
-results/ $ bash run.sh > output.txt &
-results/ $ disown %J
-```
-where J is the job number shown when you background `bash run.sh`
-
-> Note: don't forget to stop it after all final results release date! In bash, you can `kill` a disowned script using its process ID, which can be found using `ps -x`. Make sure you use the ID of `bash run.sh`, not `sleep 300` or `python main.py`.
+> Note: Don't forget to stop the script after the final results release date!
