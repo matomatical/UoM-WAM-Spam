@@ -159,7 +159,7 @@ def scrape_wam(username=UNIMELB_USERNAME, password=UNIMELB_PASSWORD):
     # load up the browser
     print("Setting up the web driver")
     with DRIVER(options=DRIVER_OPTIONS, executable_path=DRIVER_EXEPATH) as d:
-        # d.set_window_size(1120, 550)
+        d.set_window_size(1120, 550)
         d.implicitly_wait(5) # seconds
         
         # go to the results page and login with the provided username and 
