@@ -4,7 +4,7 @@ The official results release date is usually about two weeks after the end of th
 
 This script periodically checks the my.unimelb results page to detect any changes to your WAM, and sends you an email when a change is detected. If you run this script in the background on your computer or on a VPS, you'll be free to enjoy the first few weeks of your holidays without compulsively checking the results page yourself! Or is it just me who does that?
 
-Made with :purple-heart: by Matt
+Made with :purple_heart: by Matt
 
 
 ## Dependencies
