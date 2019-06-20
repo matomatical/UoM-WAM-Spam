@@ -74,7 +74,7 @@ if DRIVER is webdriver.Chrome:
     DRIVER_EXEPATH = "./chromedriver"
 
     # we probably want the web driver to run in headless mode (no display/GUI)
-    DRIVER_OPTIONS = webdriver.chrome.options.Options
+    DRIVER_OPTIONS = webdriver.chrome.options.Options()
     DRIVER_OPTIONS.headless = True
 
 
