@@ -56,17 +56,17 @@ The first time the script finds your WAM, or whenever it sees your WAM change, t
 
 The script is not very robust. If anything goes wrong, it will probably crash with an overly dramatic error message. Please see these possible errors:
 
-> While the script is setting up the web driver, it crashed with an error: `selenium.common.exceptions.SessionNotCreatedException: Message: Unable to find a matching set of capabilities`
+#### While the script is setting up the web driver, it crashed with an error: `selenium.common.exceptions.SessionNotCreatedException: Message: Unable to find a matching set of capabilities`
 
 Don't forget, you need to have the relevant browser installed (Firefox or Chromium/Google Chrome, depending on how you configured the `DRIVER` variable)!
 
 
-> The script fails to find my WAM, then crashes with an error: `selenium.common.exceptions.NoSuchElementException: Message: Unable to locate element: [id="ctl00_LogoutLinkButton"]`.
+#### The script fails to find my WAM, then crashes with an error: `selenium.common.exceptions.NoSuchElementException: Message: Unable to locate element: [id="ctl00_LogoutLinkButton"]`.
 
-You might have types your username or password wrong. Please check that you got them right, and try again. You can watch the script trying to find your WAM by setting `DRIVER_OPTIONS.headless = False`.
+You might have types your username or password wrong. Please check that you got them right, and try again. You can also watch the script trying to find your WAM by setting `DRIVER_OPTIONS.headless = False`, to see where things go wrong.
 
 
-> The script never finds my WAM! It just says `Couldn't find WAM (no WAM yet, or page load timed out)` every time.
+#### The script never finds my WAM! It just says `Couldn't find WAM (no WAM yet, or page load timed out)` every time.
 
 Does your results page contain results for multiple degrees? You might not have configured `DEGREE_INDEX` correctly! Try setting it to `0` instead of `None`.
 
