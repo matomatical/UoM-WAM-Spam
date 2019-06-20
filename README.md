@@ -7,21 +7,23 @@ This script periodically checks the my.unimelb results page to detect any change
 Made with :purple_heart: by Matt
 
 
-## Dependencies
+## Installation
 
-Requires:
+The WAM Spam script has the following dependencies:
 
 * [Python 3.6](https://www.python.org/) (or higher).
-* [Selenium](http://docs.seleniumhq.org/), a third-party web automation library. 
-    * Easily install with [pip](https://pypi.python.org/pypi/pip) using `pip install -r requirements.txt`.
+* [Selenium](http://docs.seleniumhq.org/), a third-party Python package for web automation.
+    * Easily install with [pip](https://pypi.python.org/pypi/pip) using the commands `pip3 install selenium` or `pip3 install -r requirements.txt`, or however else you prefer to install Python packages.
+
 * An automatable web browser and a driver program, which can be either:
     * Firefox and [geckodriver](https://github.com/mozilla/geckodriver).
-        * You can install Firefox through the usual means. As for geckodriver, your package manager (e.g. homebrew, apt) might have it, or you can just download the right version for your platform from [the releases page](https://github.com/mozilla/geckodriver/releases) and put it in the directory you are running the script from.
+        
+        You can install Firefox through the usual means. As for geckodriver, your package manager (e.g. homebrew, apt) might have it, or you can just download the right version for your platform from [the releases page](https://github.com/mozilla/geckodriver/releases) and put it in the directory you are running the script from.
     * Chromium (or Google Chrome) and [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/).
-        * You can install Chromium through the usual means. As for ChromeDriver, it's probably easiest to download the relevant version for your platform/Chrome(ium) version from the [downloads page](https://sites.google.com/a/chromium.org/chromedriver/downloads) and place it in the directory you are running the script from.
+    
+        You can install Chromium through the usual means. As for ChromeDriver, it's probably easiest to download the relevant version for your platform and Chromium/Chrome version from the [downloads page](https://sites.google.com/a/chromium.org/chromedriver/downloads) and place it in the directory you are running the script from.
 
     Once you choose a browser, you'll need to configure the script with your choice and tell it where to find the driver executable you installed. See below.
-
 
 ## Configuration
 
@@ -46,9 +48,9 @@ There are other configuration options, all documented in the script itself.
 
 Once you have installed the requirements and configured the script, simply run it with `python3 wamspam.py`.
 
-The script will ask you for your unimelb username and password. It uses these to log into the results page on your behalf every however-many minutes you configured, looking for your WAM (if you want to watch it, try setting . It stores the previous WAM in a text file in-between checks, for comparison.
+The script will ask you for your unimelb username and password. It uses these to log into the results page on your behalf every however-many minutes you configured, looking for your WAM (if you want to watch it, try setting `DRIVER_OPTIONS.headless = False`). It stores the previous WAM in a text file between checks, for comparison.
 
-The first time the script finds your WAM, or whenever it sees your WAM change, the script will also log in to your university email and send you a self-email notifying you about the WAM change.
+The first time the script finds your WAM, or whenever it sees your WAM change, the script will also log in to your university email and send you a self-email notifying you about the WAM change. Now you can compulsively check your email, instead of compulsively checking the results page! Haha.
 
 > Note: Don't forget to stop the script after the final results release date!
 
