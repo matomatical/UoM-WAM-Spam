@@ -58,18 +58,24 @@ The first time the script finds your WAM, or whenever it sees your WAM change, t
 
 The script is not very robust. If anything goes wrong, it will probably crash with an overly dramatic error message. Please see these possible errors:
 
-#### While the script is setting up the web driver, it crashed with an error: `selenium.common.exceptions.SessionNotCreatedException: Message: Unable to find a matching set of capabilities`
+##### While the script is setting up the web driver, it crashed with an error: `selenium.common.exceptions.SessionNotCreatedException: Message: Unable to find a matching set of capabilities`
 
 Don't forget, you need to have the relevant browser installed (Firefox or Chromium/Google Chrome, depending on how you configured the `DRIVER` variable)!
 
 
-#### The script fails to find my WAM, then crashes with an error: `selenium.common.exceptions.NoSuchElementException: Message: Unable to locate element: [id="ctl00_LogoutLinkButton"]`.
+##### The script fails to find my WAM, then crashes with an error: `selenium.common.exceptions.NoSuchElementException: Message: Unable to locate element: [id="ctl00_LogoutLinkButton"]`.
 
 You might have types your username or password wrong. Please check that you got them right, and try again. You can also watch the script trying to find your WAM by setting `DRIVER_OPTIONS.headless = False`, to see where things go wrong.
 
 
-#### The script never finds my WAM! It just says `Couldn't find WAM (no WAM yet, or page load timed out)` every time.
+##### The script never finds my WAM! It just says `Couldn't find WAM (no WAM yet, or page load timed out)` every time.
 
 Does your results page contain results for multiple degrees? You might not have configured `DEGREE_INDEX` correctly! Try setting it to `0` instead of `None`.
 
 If that doesn't fix it, you could watch the script trying to find your WAM by setting `DRIVER_OPTIONS.headless = False`, and see if something else might be causing the problem.
+
+##### The script crashes when logging in to my email account, with error `smtplib.SMTPAuthenticationError: (535, b'5.7.8 Username and Password not accepted` or similar.
+
+It sounds like Google may be blocking the script's attempt to log in to its SMTP server. This is because Google thinks the way the script logs into your account does not meet google's security standards. The solution is to go to https://myaccount.google.com/u/2/lesssecureapps?pageId=none and turn the "allow less secure app" option on. Remember to turn it off when you get your results.
+
+There may be a proper fix for this related to how the script tries to authenticate, but I don't know anything about SMTP authentication.
