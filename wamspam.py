@@ -148,10 +148,10 @@ class InvalidLoginException(Exception):
     """Represent a login form validation error"""
 
 
-
 def scrape_wam(username=UNIMELB_USERNAME, password=UNIMELB_PASSWORD):
     with requests.Session() as session:
         # step 1. load a login page to initialse session
+        print("Logging in to the results page")
         response = session.get("https://prod.ss.unimelb.edu.au"
             "/student/SM/ResultsDtls10.aspx?f=$S1.EST.RSLTDTLS.WEB")
         soup = BeautifulSoup(response.content, BS4_PARSER)
@@ -181,6 +181,10 @@ def scrape_wam(username=UNIMELB_USERNAME, password=UNIMELB_PASSWORD):
         # multi-degree students)
         title = soup.find(id="ctl00_h1PageTitle")
         if title.text == "Results > Choose a Study Plan":
+            print("Multiple degrees detected.")
+            degree_grid = soup.find("table", id="ctl00_Content_grdResultPlans")
+            cell = degree_grid.find_all("tr")[DEGREE_INDEX+1].find_all("td")[2]
+            print(f"Loading results for degree {DEGREE_INDEX} - {cell.text}")
             # get the form's hidden field values into the POST data
             hidden_fields = soup.find_all('input', type='hidden')
             degree_form = {tag['name']: tag['value'] for tag in hidden_fields}
@@ -195,10 +199,12 @@ def scrape_wam(username=UNIMELB_USERNAME, password=UNIMELB_PASSWORD):
         # now `soup` should be the parsed results page for the chosen degree...
 
         # step 4. extract the actual WAM text from the results page, as required
+        print("Extracting WAM")
         wam_para = soup.find(class_='UMWAMText')
         if wam_para is not None:
             wam_text = wam_para.find('b').text
         else:
+            print("Couldn't find WAM (assuming no WAM yet)")
             wam_text = None
 
     return wam_text
