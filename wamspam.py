@@ -9,8 +9,8 @@ import getpass
 import smtplib
 from email.mime.text import MIMEText
 
-from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
+import requests
+from bs4 import BeautifulSoup
 
 
 # # #
@@ -34,51 +34,19 @@ UNIMELB_PASSWORD = getpass.getpass()
 # your WAM will be stored in this file in between checks
 WAM_FILENAME = "wam.txt"
 
+
 # # #
 # WEB SCRAPING CONFIGURATION
 #
 
 # if you have multiple degrees, set this to the id of the degree with the WAM
 # you want the script to watch (0, 1, 2, ... based on order from results page).
-# If you only have a single degree, then set it to None.
-# DEGREE_INDEX = 0
-DEGREE_INDEX = None
+# if you only have a single degree, you can ignore this one.
+DEGREE_INDEX = 0
 
-
-# now, choose your web browser and driver:
-
-# after the deprecation of phantomjs, the options are pretty much firefox or
-# google chrome/chromium. I found chromium uses less memory, but you can use
-# whichever you prefer. Make sure you have the corresponding browser installed
-# on your system!
-# DRIVER = webdriver.Firefox # For Mozilla Firefox
-DRIVER = webdriver.Chrome # For Chromium or Google Chrome
-
-# you'll also need to install and hook up the actual driver program, and
-# configure some options:
-if DRIVER is webdriver.Firefox:
-    # for firefox, it's called `geckodriver`, and your package manager (e.g.
-    # brew) might have it, or just download the right version for your platform
-    # from here: https://github.com/mozilla/geckodriver/releases and put it in
-    # the working directory, or put it on your path (and remove the `./` from
-    # the line below)
-    DRIVER_EXEPATH = "./geckodriver"
-
-    # we probably want the web driver to run in headless mode (no display/GUI)
-    DRIVER_OPTIONS = webdriver.firefox.options.Options()
-    DRIVER_OPTIONS.headless = True
-
-if DRIVER is webdriver.Chrome:
-    # for chrome(ium), it's called `chromedriver`, and you'll need the right
-    # version for you platform and chrome version. you can probably find it
-    # here: https://sites.google.com/a/chromium.org/chromedriver/downloads
-    # like geckodriver, just put it in your workind directory or on your path
-    # and configure this path accordingly so that the script can find it:
-    DRIVER_EXEPATH = "./chromedriver"
-
-    # we probably want the web driver to run in headless mode (no display/GUI)
-    DRIVER_OPTIONS = webdriver.chrome.options.Options()
-    DRIVER_OPTIONS.headless = True
+# select the HTML parser for BeautifulSoup to use. in most cases, you won't
+# have to touch this.
+BS4_PARSER = "html.parser"
 
 
 # # #
@@ -119,6 +87,7 @@ and I'll let you know if it changes.
 UNIMELB_SMTP_HOST = "smtp.gmail.com"
 UNIMELB_SMTP_PORT = 587
 
+
 # let's get to it!
 
 def main():
@@ -140,7 +109,7 @@ def poll_and_email():
 
     # check the results page for the updated WAM
     new_wam_text = scrape_wam()
-    if new_wam_text == None:
+    if new_wam_text is None:
         # no WAM found
         return
     new_wam = float(new_wam_text)
@@ -175,56 +144,68 @@ def poll_and_email():
         wamfile.write(f"{new_wam}\n")
 
 
+class InvalidLoginException(Exception):
+    """Represent a login form validation error"""
+
+
 def scrape_wam(username=UNIMELB_USERNAME, password=UNIMELB_PASSWORD):
-    """
-    Control a web browser to log into the results page as the student (with 
-    provided username and password) and retrieve their WAM
-    """
-    print("Scraping WAM...")
-
-    # load up the browser
-    print("Setting up the web driver")
-    with DRIVER(options=DRIVER_OPTIONS, executable_path=DRIVER_EXEPATH) as d:
-        d.set_window_size(1120, 550)
-        d.implicitly_wait(5) # seconds
-        
-        # go to the results page and login with the provided username and 
-        # password
+    with requests.Session() as session:
+        # step 1. load a login page to initialse session
         print("Logging in to the results page")
-        d.get("https://prod.ss.unimelb.edu.au/student/SM/ResultsDtls10.aspx"
-                "?f=$S1.EST.RSLTDTLS.WEB")
-        usernamebox = d.find_element_by_id("ctl00_Content_txtUserName_txtText")
-        passwordbox = d.find_element_by_id("ctl00_Content_txtPassword_txtText")
-        loginbutton = d.find_element_by_id("ctl00_Content_cmdLogin")
-        usernamebox.send_keys(username)
-        passwordbox.send_keys(password)
-        loginbutton.click()
+        response = session.get("https://prod.ss.unimelb.edu.au"
+            "/student/SM/ResultsDtls10.aspx?f=$S1.EST.RSLTDTLS.WEB")
+        soup = BeautifulSoup(response.content, BS4_PARSER)
 
-        # if the student has multiple degrees, then we may need to navigate to
-        # their chosen degree
-        if DEGREE_INDEX is not None:
-            # the buttons don't seem to have a convenient ID to latch on to,
-            # but executing their scripted action directly achieves the same
-            # effect as finding and clicking them:
-            print("Loading results for degree number", DEGREE_INDEX)
-            d.execute_script(
-                f"javascript:__doPostBack('ctl00$Content$grdResultPlans',"
-                f"'ViewResults${DEGREE_INDEX}')")
+        # step 2. fill in login form and authenticate, reaching results page
+        # get the form's hidden field values into the POST data
+        hidden_fields = soup.find_all('input', type='hidden')
+        login_form = {tag['name']: tag['value'] for tag in hidden_fields}
+        # simulate filling in the form with username and password,
+        # and pressing the login button
+        login_form['ctl00$Content$txtUserName$txtText'] = username
+        login_form['ctl00$Content$txtPassword$txtText'] = password
+        login_form['__EVENTTARGET'] = "ctl00$Content$cmdLogin"
+        # post the form, with a URL that will take us back to the results page
+        response = session.post("https://prod.ss.unimelb.edu.au/student/"
+            "login.aspx?f=$S1.EST.RSLTDTLS.WEB&ReturnUrl=%2fstudent%2fSM%2f"
+            "ResultsDtls10.aspx%3ff%3d%24S1.EST.RSLTDTLS.WEB", data=login_form)
+        # detect a potential failed login
+        soup = BeautifulSoup(response.content, BS4_PARSER)
+        if soup.find(id="ctl00_Content_valErrors"):
+            raise InvalidLoginException("Your login attempt was not successful."
+                " Please check your details and try again.")
+
+        # now `soup` should be the parsed results page or multi-degree page...
+
+        # step 3. if necessary, navigate to a specific degree page (for
+        # multi-degree students)
+        title = soup.find(id="ctl00_h1PageTitle")
+        if title.text == "Results > Choose a Study Plan":
+            print("Multiple degrees detected.")
+            degree_grid = soup.find("table", id="ctl00_Content_grdResultPlans")
+            cell = degree_grid.find_all("tr")[DEGREE_INDEX+1].find_all("td")[2]
+            print(f"Loading results for degree {DEGREE_INDEX} - {cell.text}")
+            # get the form's hidden field values into the POST data
+            hidden_fields = soup.find_all('input', type='hidden')
+            degree_form = {tag['name']: tag['value'] for tag in hidden_fields}
+            # now simulate pressing the required degree button
+            degree_form['__EVENTTARGET'] = "ctl00$Content$grdResultPlans"
+            degree_form['__EVENTARGUMENT'] = f"ViewResults${DEGREE_INDEX}"
+            # post the form, to take us to the results page proper
+            response = session.post("https://prod.ss.unimelb.edu.au/student/SM/"
+                "ResultsDtls10.aspx?f=$S1.EST.RSLTDTLS.WEB", data=degree_form)
+            soup = BeautifulSoup(response.content, BS4_PARSER)
+
+        # now `soup` should be the parsed results page for the chosen degree...
+
+        # step 4. extract the actual WAM text from the results page, as required
+        print("Extracting WAM")
+        wam_para = soup.find(class_='UMWAMText')
+        if wam_para is not None:
+            wam_text = wam_para.find('b').text
         else:
-            print("Expecting not to find multiple degrees.")
-        
-        # now we can try to find the WAM text itself within this results page
-        try:
-            print("Extracting WAM")
-            wam_para = d.find_element_by_class_name("UMWAMText")
-            wam_text = wam_para.find_element_by_tag_name("b").text
-        except NoSuchElementException:
-            print("Couldn't find WAM (no WAM yet, or page load timed out)")
+            print("Couldn't find WAM (assuming no WAM yet)")
             wam_text = None
-
-        print("Logging out.")
-        logoutbutton = d.find_element_by_id("ctl00_LogoutLinkButton")
-        logoutbutton.click()
 
     return wam_text
 
