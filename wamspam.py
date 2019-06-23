@@ -62,7 +62,7 @@ EMAIL_PASSWORD = UNIMELB_PASSWORD
 
 # here we specify the format of the email messages (customise to your liking)
 SUBJECT = "WAM Update Detected"
-EMAIL_TEMPLATE = """Hey there!
+EMAIL_TEMPLATE = """Hello there!
 {message}
 Love,
 WAM Spammer
@@ -82,6 +82,13 @@ I noticed that your WAM is {after}. I hope it makes you
 happy. Anyway, I'll keep an eye on it for you from now on,
 and I'll let you know if it changes.
 """
+HELLO_SUBJECT = "Hello! I'm WAM Spammer"
+HELLO_MESSAGE = """
+I'm WAM Spammer. This is just a test message to tell you
+that I'm running. I'll look out for a change to your WAM
+every so often---unless I crash! Every now and then you
+should probably check to make sure nothing has gone wrong.
+"""
 
 # these are unlikely to change
 UNIMELB_SMTP_HOST = "smtp.gmail.com"
@@ -92,21 +99,33 @@ UNIMELB_SMTP_PORT = 587
 
 def main():
     """Run the checking script, once or forever, depending on configuration."""
+    # conduct the first check! don't catch any exceptions here, if the
+    # check fails this first time, it's likely to be a configuration problem
+    # (e.g. wrong username/password) so we should crash the script to let the
+    # user know.
     poll_and_email()
+    # also send a test message to make sure the email configuration is working
+    email_self(HELLO_SUBJECT, EMAIL_TEMPLATE.format(message=HELLO_MESSAGE))
 
     while CHECK_REPEATEDLY:
         print("Sleeping", DELAY_BETWEEN_CHECKS, "minutes before next check.")
         time.sleep(DELAY_BETWEEN_CHECKS * 60) # seconds
         print("Waking up!")
-        poll_and_email()
-
+        try:
+            poll_and_email()
+        except Exception as e:
+            # if we get an exception now, it may have been some temporary
+            # problem accessing the website, let's just ignore it and try
+            # again next time.
+            print("Exception encountered:")
+            print(f"{e.__class__.__name__}: {e}")
+            print("Hopefully it won't happen again. Continuing.")
 
 def poll_and_email():
     """
     Check for an updated WAM, and send an email notification if any change is
     detected.
     """
-
     # check the results page for the updated WAM
     new_wam_text = scrape_wam()
     if new_wam_text is None:
@@ -204,7 +223,7 @@ def scrape_wam(username=UNIMELB_USERNAME, password=UNIMELB_PASSWORD):
         if wam_para is not None:
             wam_text = wam_para.find('b').text
         else:
-            print("Couldn't find WAM (assuming no WAM yet)")
+            print("Couldn't find WAM (no WAM yet?)")
             wam_text = None
 
     return wam_text
