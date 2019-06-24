@@ -93,7 +93,7 @@ def main():
     # user know.
 
     # notification_helper = EmailNotification(UNIMELB_USERNAME, UNIMELB_PASSWORD)
-    notification_helper = ServerChanNotification()
+    notification_helper = select_notification_method()
 
     poll_and_email(notification_helper)
     # also send a test message to make sure the email configuration is working
@@ -219,6 +219,21 @@ def scrape_wam(username=UNIMELB_USERNAME, password=UNIMELB_PASSWORD):
             wam_text = None
 
     return wam_text
+
+def select_notification_method() -> NotificationHelper:
+    print()
+
+    methods = ["Email", "PushBullet", "ServerChan (WeChat)"]
+    for i, m in enumerate(methods):
+        print("{}: {}".format(i, m))
+    i = int(input("Please select a notification method:") or 0)
+    print(methods[i])
+
+    if i == 0:
+        return EmailNotification(UNIMELB_USERNAME, UNIMELB_PASSWORD)
+    else:
+        return PushBulletNotification() if i == 1 else ServerChanNotification()
+
 
 if __name__ == '__main__':
     main()
