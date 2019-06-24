@@ -1,6 +1,7 @@
 import smtplib
 from email.mime.text import MIMEText
 import requests
+from pushbullet import Pushbullet
 
 class NotificationHelper:
     """
@@ -51,10 +52,11 @@ class EmailNotification(NotificationHelper):
         s.quit()
         print("Sent!")
 
+
 class ServerChanNotification(NotificationHelper):
     """
     Send notification to wechat using ServerChan.
-    http://sc.ftqq.com
+    https://sc.ftqq.com
     """
     def __init__(self) -> None:
         token = input("SCKEY: ")
@@ -73,3 +75,21 @@ class ServerChanNotification(NotificationHelper):
         else:
             raise Exception(r.text)
 
+
+class PushBulletNotification(NotificationHelper):
+    """
+    Send notification using PushBullet.
+    https://www.pushbullet.com
+    """
+    def __init__(self) -> None:
+        token = input("Access Token: ")
+        self.pb = Pushbullet(token)
+
+    def notify(self, subject: str, text: str) -> None:
+        print("Message:", '"""', text, '"""', sep="\n")
+        
+        push = self.pb.push_note(subject, text)
+        if push["active"]:
+            print("Sent!")
+        else:
+            raise Exception(str(push))
