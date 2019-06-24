@@ -10,7 +10,7 @@ import getpass
 import requests
 from bs4 import BeautifulSoup
 
-from mailer import Mailer
+from mailer import APIMailer, SMTPMailer
 
 # # #
 # SCRIPT CONFIGURATION
@@ -50,10 +50,19 @@ BS4_PARSER = "html.parser"
 
 # # #
 # EMAIL CONFIGURATION
-# 
+#
+
+# set this to True (not recommended) if you would like to use SMTP with legacy
+# username and password authentication instead of the Gmail API with OAuth 2.0.
+# if this is set to True, you must enable access by less secure apps in your
+# settings (https://myaccount.google.com/u/2/lesssecureapps?pageId=none).
+LEGACY_AUTH = False
 
 # the script will send email from and to this student email address.
 EMAIL_ADDRESS = UNIMELB_USERNAME + "@student.unimelb.edu.au"
+
+# this field is only used if LEGACY_AUTH == True
+EMAIL_PASSWORD = UNIMELB_PASSWORD
 
 # here we specify the format of the email messages (customise to your liking)
 SUBJECT = "WAM Update Detected"
@@ -85,14 +94,24 @@ every so often---unless I crash! Every now and then you
 should probably check to make sure nothing has gone wrong.
 """
 
+# these are only used if LEGACY_AUTH == True and are unlikely to change
+UNIMELB_SMTP_HOST = "smtp.gmail.com"
+UNIMELB_SMTP_PORT = 587
+
 
 # let's get to it!
 
 def main():
     """Run the checking script, once or forever, depending on configuration."""
-    # initialise the mailer; you will be asked to grant email permissions if
-    # this is the first time running the script.
-    mailer = Mailer()
+    # initialise the mailer depending on configuration value
+    if LEGACY_AUTH:
+        mailer = SMTPMailer(smtp_host=UNIMELB_SMTP_HOST,
+                            smtp_port=UNIMELB_SMTP_PORT,
+                            email=EMAIL_ADDRESS, password=EMAIL_PASSWORD)
+    else:
+        # you will be asked to grant email permissions if this is the first time
+        # running the script.
+        mailer = APIMailer()
 
     # conduct the first check! don't catch any exceptions here, if the
     # check fails this first time, it's likely to be a configuration problem
@@ -104,7 +123,7 @@ def main():
                                     to=EMAIL_ADDRESS, subject=HELLO_SUBJECT,
                                     body=EMAIL_TEMPLATE.format(
                                         message=HELLO_MESSAGE))
-    mailer.send_message(user_id='me', message=message)
+    mailer.send_message(message)
 
     while CHECK_REPEATEDLY:
         print("Sleeping", DELAY_BETWEEN_CHECKS, "minutes before next check.")

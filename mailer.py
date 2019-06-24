@@ -1,6 +1,7 @@
 import base64
 import pickle
 import os.path
+import smtplib
 
 from email.mime.text import MIMEText
 
@@ -11,6 +12,26 @@ from googleapiclient.errors import HttpError
 
 
 class Mailer:
+    """Class to create email messages following the RFC 2822 standard."""
+
+    @staticmethod
+    def create_message(sender, to, subject, body):
+        """Create a base-64 encoded email message.
+
+        :param sender: The sender
+        :param to: The recipient
+        :param subject: Subject line
+        :param body: Email body contents
+        :return: Object containing the base-64 encoded email message.
+        """
+        message = MIMEText(body)
+        message['to'] = to
+        message['from'] = sender
+        message['subject'] = subject
+        return {'raw': base64.urlsafe_b64encode(message.as_bytes()).decode()}
+
+
+class APIMailer(Mailer):
     """Class to send emails using the Gmail API and OAuth 2.0 Protocol.
 
     To use this class, you must obtain an OAuth 2.0 Client ID from the
@@ -46,28 +67,12 @@ class Mailer:
 
         self.service = build('gmail', 'v1', credentials=self.creds)
 
-    @staticmethod
-    def create_message(sender, to, subject, body):
-        """Create a base-64 encoded email message.
-
-        :param sender: The sender
-        :param to: The recipient
-        :param subject: Subject line
-        :param body: Email body contents
-        :return: Object containing the base-64 encoded email message.
-        """
-        message = MIMEText(body)
-        message['to'] = to
-        message['from'] = sender
-        message['subject'] = subject
-        return {'raw': base64.urlsafe_b64encode(message.as_bytes()).decode()}
-
-    def send_message(self, user_id, message):
+    def send_message(self, message, user_id='me'):
         """Send an email message.
 
+        :param message: Message to be sent
         :param user_id: User's email address (the special value 'me'
         can be used to indicate the authenticated user)
-        :param message: Message to be sent
         :return: The sent message
         """
         try:
@@ -77,3 +82,33 @@ class Mailer:
             return message
         except HttpError as error:
             print(f'An error occurred: {error}')
+
+
+class SMTPMailer(Mailer):
+    """Class to send emails using SMTP and username/password authentication.
+
+    To use this class, you must enable access by less secure apps in your
+    settings (https://myaccount.google.com/u/2/lesssecureapps?pageId=none).
+
+    Warning: This is not a modern method of authentication. Enabling access by
+    less secure apps is not recommended.
+    """
+
+    def __init__(self, smtp_host, smtp_port, email, password):
+        self.smtp_host = smtp_host
+        self.smtp_port = smtp_port
+        self.email = email
+        self.password = password
+
+    def send_message(self, message):
+        """Log into the SMTP server and send a message.
+
+        :param message: Message to be sent
+        """
+        s = smtplib.SMTP(self.smtp_host, self.smtp_port)
+        s.ehlo()
+        s.starttls()
+        s.login(self.email, self.password)
+        s.sendmail(self.email, [self.email], message.as_string())
+        s.quit()
+        print("Email sent!")
