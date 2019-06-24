@@ -53,13 +53,6 @@ BS4_PARSER = "html.parser"
 # EMAIL CONFIGURATION
 # 
 
-# the script will send email from and to your student email address.
-# if you need to use an app-specific password to get around 2FA on
-# your email account, or other authentication issues, you can set it
-# here as the value of EMAIL_PASSWORD.
-EMAIL_ADDRESS  = UNIMELB_USERNAME + "@student.unimelb.edu.au"
-EMAIL_PASSWORD = UNIMELB_PASSWORD
-
 # here we specify the format of the email messages (customise to your liking)
 SUBJECT = "WAM Update Detected"
 EMAIL_TEMPLATE = """Hello there!
@@ -89,11 +82,6 @@ that I'm running. I'll look out for a change to your WAM
 every so often---unless I crash! Every now and then you
 should probably check to make sure nothing has gone wrong.
 """
-
-# these are unlikely to change
-UNIMELB_SMTP_HOST = "smtp.gmail.com"
-UNIMELB_SMTP_PORT = 587
-
 
 # let's get to it!
 
@@ -228,37 +216,58 @@ def scrape_wam(username=UNIMELB_USERNAME, password=UNIMELB_PASSWORD):
 
     return wam_text
 
-
-def email_self(subject, text, address=EMAIL_ADDRESS, password=EMAIL_PASSWORD):
+class NotificationHelper:
     """
-    Send an email from the student to the student (with provided email address
-    and password)
-
-    :param subject: The email subject line
-    :param text: The email body text
-    :param address: The email address to use (as SMTP login username, email 
-                    sender, and email recipient)
-    :param password: The password to use for SMTP server login.
+    Interface for Notification Helper
     """
-    print("Sending an email to self...")
-    print("From/To:", address)
-    print("Subject:", subject)
-    print("Message:", '"""', text, '"""', sep="\n")
-    
-    # make the email object
-    msg = MIMEText(text)
-    msg['To'] = address
-    msg['From'] = f"WAM Spammer <{address}>"
-    msg['Subject'] = subject
+    def __init__(self) -> None:
+        """
+        Initialize the helper. Ask user to input credential if needed.
+        """
+        raise NotImplementedError()
 
-    # log into the unimelb student email SMTP server (gmail) to send it
-    s = smtplib.SMTP(UNIMELB_SMTP_HOST, UNIMELB_SMTP_PORT)
-    s.ehlo(); s.starttls()
-    s.login(address, password)
-    s.sendmail(address, [address], msg.as_string())
-    s.quit()
-    print("Sent!")
+    def notify(self, subject: str, text: str) -> None:
+        """
+        Trigger the notification.
 
+        :param subject: The notification subject line
+        :param text: The notification body text
+        """
+        raise NotImplementedError()
+
+class EmailNotification(NotificationHelper):
+
+    def __init__(self) -> None:
+        # these are unlikely to change
+        self.UNIMELB_SMTP_HOST = "smtp.gmail.com"
+        self.UNIMELB_SMTP_PORT = 587
+
+        # the script will send email from and to your student email address.
+        # if you need to use an app-specific password to get around 2FA on
+        # your email account, or other authentication issues, you can set it
+        # here as the value of EMAIL_PASSWORD.
+        self.EMAIL_ADDRESS  = UNIMELB_USERNAME + "@student.unimelb.edu.au"
+        self.EMAIL_PASSWORD = UNIMELB_PASSWORD
+
+    def notify(self, subject: str, text: str) -> None:
+        print("Sending an email to self...")
+        print("From/To:", self.EMAIL_ADDRESS)
+        print("Subject:", subject)
+        print("Message:", '"""', text, '"""', sep="\n")
+        
+        # make the email object
+        msg = MIMEText(text)
+        msg['To'] = self.EMAIL_ADDRESS
+        msg['From'] = f"WAM Spammer <{self.EMAIL_ADDRESS}>"
+        msg['Subject'] = subject
+
+        # log into the unimelb student email SMTP server (gmail) to send it
+        s = smtplib.SMTP(self.UNIMELB_SMTP_HOST, self.UNIMELB_SMTP_PORT)
+        s.ehlo(); s.starttls()
+        s.login(self.EMAIL_ADDRESS, self.EMAIL_PASSWORD)
+        s.sendmail(self.EMAIL_ADDRESS, [self.EMAIL_ADDRESS], msg.as_string())
+        s.quit()
+        print("Sent!")
 
 if __name__ == '__main__':
     main()
