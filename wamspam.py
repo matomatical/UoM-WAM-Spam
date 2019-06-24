@@ -6,11 +6,11 @@ update, and then send the student a self-email if anything changed
 """
 import time
 import getpass
-import smtplib
-from email.mime.text import MIMEText
 
 import requests
 from bs4 import BeautifulSoup
+
+from notification import *
 
 
 # # #
@@ -91,16 +91,20 @@ def main():
     # check fails this first time, it's likely to be a configuration problem
     # (e.g. wrong username/password) so we should crash the script to let the
     # user know.
-    poll_and_email()
+
+    # notification_helper = EmailNotification(UNIMELB_USERNAME, UNIMELB_PASSWORD)
+    notification_helper = ServerChanNotification()
+
+    poll_and_email(notification_helper)
     # also send a test message to make sure the email configuration is working
-    email_self(HELLO_SUBJECT, EMAIL_TEMPLATE.format(message=HELLO_MESSAGE))
+    notification_helper.notify(HELLO_SUBJECT, EMAIL_TEMPLATE.format(message=HELLO_MESSAGE))
 
     while CHECK_REPEATEDLY:
         print("Sleeping", DELAY_BETWEEN_CHECKS, "minutes before next check.")
         time.sleep(DELAY_BETWEEN_CHECKS * 60) # seconds
         print("Waking up!")
         try:
-            poll_and_email()
+            poll_and_email(notification_helper)
         except Exception as e:
             # if we get an exception now, it may have been some temporary
             # problem accessing the website, let's just ignore it and try
@@ -109,7 +113,7 @@ def main():
             print(f"{e.__class__.__name__}: {e}")
             print("Hopefully it won't happen again. Continuing.")
 
-def poll_and_email():
+def poll_and_email(notification_helper: NotificationHelper):
     """
     Check for an updated WAM, and send an email notification if any change is
     detected.
@@ -144,7 +148,7 @@ def poll_and_email():
     # compose and send the message
     message = message_template.format(before=old_wam, after=new_wam)
     email_text = EMAIL_TEMPLATE.format(message=message)
-    email_self(SUBJECT, email_text)
+    notification_helper.notify(SUBJECT, email_text)
     
     # update the wam file for next time
     with open(WAM_FILENAME, 'w') as wamfile:
@@ -215,59 +219,6 @@ def scrape_wam(username=UNIMELB_USERNAME, password=UNIMELB_PASSWORD):
             wam_text = None
 
     return wam_text
-
-class NotificationHelper:
-    """
-    Interface for Notification Helper
-    """
-    def __init__(self) -> None:
-        """
-        Initialize the helper. Ask user to input credential if needed.
-        """
-        raise NotImplementedError()
-
-    def notify(self, subject: str, text: str) -> None:
-        """
-        Trigger the notification.
-
-        :param subject: The notification subject line
-        :param text: The notification body text
-        """
-        raise NotImplementedError()
-
-class EmailNotification(NotificationHelper):
-
-    def __init__(self) -> None:
-        # these are unlikely to change
-        self.UNIMELB_SMTP_HOST = "smtp.gmail.com"
-        self.UNIMELB_SMTP_PORT = 587
-
-        # the script will send email from and to your student email address.
-        # if you need to use an app-specific password to get around 2FA on
-        # your email account, or other authentication issues, you can set it
-        # here as the value of EMAIL_PASSWORD.
-        self.EMAIL_ADDRESS  = UNIMELB_USERNAME + "@student.unimelb.edu.au"
-        self.EMAIL_PASSWORD = UNIMELB_PASSWORD
-
-    def notify(self, subject: str, text: str) -> None:
-        print("Sending an email to self...")
-        print("From/To:", self.EMAIL_ADDRESS)
-        print("Subject:", subject)
-        print("Message:", '"""', text, '"""', sep="\n")
-        
-        # make the email object
-        msg = MIMEText(text)
-        msg['To'] = self.EMAIL_ADDRESS
-        msg['From'] = f"WAM Spammer <{self.EMAIL_ADDRESS}>"
-        msg['Subject'] = subject
-
-        # log into the unimelb student email SMTP server (gmail) to send it
-        s = smtplib.SMTP(self.UNIMELB_SMTP_HOST, self.UNIMELB_SMTP_PORT)
-        s.ehlo(); s.starttls()
-        s.login(self.EMAIL_ADDRESS, self.EMAIL_PASSWORD)
-        s.sendmail(self.EMAIL_ADDRESS, [self.EMAIL_ADDRESS], msg.as_string())
-        s.quit()
-        print("Sent!")
 
 if __name__ == '__main__':
     main()
