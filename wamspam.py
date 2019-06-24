@@ -42,7 +42,7 @@ WAM_FILENAME = "wam.txt"
 # if you have multiple degrees, set this to the id of the degree with the WAM
 # you want the script to watch (0, 1, 2, ... based on order from results page).
 # if you only have a single degree, you can ignore this one.
-DEGREE_INDEX = 0
+DEGREE_INDEX = int(input("Degree index: ") or 0)
 
 # select the HTML parser for BeautifulSoup to use. in most cases, you won't
 # have to touch this.
