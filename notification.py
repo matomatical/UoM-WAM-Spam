@@ -4,6 +4,7 @@ from inspect import cleandoc
 
 import requests
 from pushbullet import Pushbullet
+from datetime import datetime
 
 class NotificationHelper:
     """
@@ -84,7 +85,7 @@ class PushBulletNotification(NotificationHelper):
     https://www.pushbullet.com
     """
     def __init__(self) -> None:
-        token = input("Access Token: ")
+        token = input("PushBullet Access Token: ")
         self.pb = Pushbullet(token)
 
     def notify(self, subject: str, text: str) -> None:
@@ -201,3 +202,32 @@ class IFTTTWebhookNotification(NotificationHelper):
             print("Triggered!", r.text)
         else:
             raise Exception(r.status_code, r.text)
+
+class DesktopNotification(NotificationHelper):
+    """
+    Sends a desktop notification using the notify2 python library (https://pypi.org/project/notify2/)
+    """
+
+    def __init__(self) -> None:
+        import notify2
+        notify2.init("UoM-WAM-Spam")
+        self.notification = notify2.Notification
+        self.timeout = notify2.EXPIRES_NEVER
+
+    def notify(self, subject: str, text: str) -> None:
+        n = self.notification(subject, text)
+        n.set_timeout(self.timeout)
+        n.show()
+
+class LogFile(NotificationHelper):
+    """
+    Writes 'notifications' to a local file.
+    """
+
+    def __init__(self) -> None:
+        self.fp = input("Enter the file path to log WAM changes to: ")
+
+    def notify(self, subject: str, text: str) -> None:
+        print("writing notification to log file at: ", self.fp)
+        with open(self.fp, 'a+') as f:
+            f.write('=' * 20 + '\nTime: ' + datetime.now().strftime('%a, %d %b %Y %H:%M:%S') + '\n' + subject + '\n' + text + '=' * 20 + '\n')

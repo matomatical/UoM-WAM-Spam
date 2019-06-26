@@ -231,7 +231,9 @@ def select_notification_method() -> NotificationHelper:
         ("PushBullet", PushBulletNotification),
         ("ServerChan (WeChat)", ServerChanNotification),
         ("Telegram Bot", TelegramBotNotification),
-        ("IFTTT Webhook", IFTTTWebhookNotification)
+        ("IFTTT Webhook", IFTTTWebhookNotification),
+        ("Desktop Notifications", DesktopNotification),
+        ("Log File", LogFile)
     ]
     for i, m in enumerate(methods):
         print("{}: {}".format(i, m[0]))
