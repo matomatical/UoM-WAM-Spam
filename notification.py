@@ -84,18 +84,22 @@ class PushBulletNotification(NotificationHelper):
     https://www.pushbullet.com
     """
     def __init__(self) -> None:
-        from pushbullet import Pushbullet
-        token = input("Pushbullet Access Token: ")
-        self.pb = Pushbullet(token)
+        self.token = input("Pushbullet Access Token: ")
 
     def notify(self, subject: str, text: str) -> None:
         print("Message:", '"""', text, '"""', sep="\n")
-        
-        push = self.pb.push_note(subject, text)
-        if push["active"]:
-            print("Sent!")
+
+        data = {
+            "type": "note",
+            "title": subject,
+            "body": text
+        }
+
+        r = requests.post("https://api.pushbullet.com/v2/pushes", auth=(self.token, ''), json=data)
+        if r.status_code == 200:
+            print("Sent!", r.text)
         else:
-            raise Exception(str(push))
+            raise Exception(r.status_code, r.text)
 
 
 class TelegramBotNotification(NotificationHelper):
