@@ -228,7 +228,7 @@ def select_notification_method() -> NotificationHelper:
 
     methods = [
         ("Email", partial(EmailNotification, UNIMELB_USERNAME, UNIMELB_PASSWORD)),
-        ("PushBullet", PushBulletNotification),
+        ("Pushbullet", PushBulletNotification),
         ("ServerChan (WeChat)", ServerChanNotification),
         ("Telegram Bot", TelegramBotNotification),
         ("IFTTT Webhook", IFTTTWebhookNotification),

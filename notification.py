@@ -85,7 +85,7 @@ class PushBulletNotification(NotificationHelper):
     """
     def __init__(self) -> None:
         from pushbullet import Pushbullet
-        token = input("PushBullet Access Token: ")
+        token = input("Pushbullet Access Token: ")
         self.pb = Pushbullet(token)
 
     def notify(self, subject: str, text: str) -> None:
