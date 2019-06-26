@@ -3,7 +3,6 @@ from email.mime.text import MIMEText
 from inspect import cleandoc
 
 import requests
-from pushbullet import Pushbullet
 from datetime import datetime
 
 class NotificationHelper:
@@ -85,6 +84,7 @@ class PushBulletNotification(NotificationHelper):
     https://www.pushbullet.com
     """
     def __init__(self) -> None:
+        from pushbullet import Pushbullet
         token = input("PushBullet Access Token: ")
         self.pb = Pushbullet(token)
 
