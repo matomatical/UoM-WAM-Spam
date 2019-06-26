@@ -42,8 +42,6 @@ The first time the script finds your WAM, or whenever it sees your WAM change, t
 
 ### Notification Options
 
-If you would like to use Pushbullet, install the `pushbullet.py` package: `pip install pushbullet.py`
-
 If you would like to use desktop notifications, install the `notify2` package: `pip install notify2`
 
 ### Common issues
