@@ -10,6 +10,7 @@ import getpass
 import requests
 from bs4 import BeautifulSoup
 
+from functools import partial
 from notification import *
 
 
@@ -42,7 +43,7 @@ WAM_FILENAME = "wam.txt"
 # if you have multiple degrees, set this to the id of the degree with the WAM
 # you want the script to watch (0, 1, 2, ... based on order from results page).
 # if you only have a single degree, you can ignore this one.
-DEGREE_INDEX = int(input("Degree index: ") or 0)
+DEGREE_INDEX = int(input("Degree index (or just press enter): ") or 0)
 
 # select the HTML parser for BeautifulSoup to use. in most cases, you won't
 # have to touch this.
@@ -93,18 +94,19 @@ def main():
     # user know.
 
     # notification_helper = EmailNotification(UNIMELB_USERNAME, UNIMELB_PASSWORD)
-    notification_helper = select_notification_method()
+    notification_helpers = select_notification_method()
 
-    poll_and_email(notification_helper)
+    poll_and_notify(notification_helpers)
     # also send a test message to make sure the email configuration is working
-    notification_helper.notify(HELLO_SUBJECT, EMAIL_TEMPLATE.format(message=HELLO_MESSAGE))
+    for notification_helper in notification_helpers:
+        notification_helper.notify(HELLO_SUBJECT, EMAIL_TEMPLATE.format(message=HELLO_MESSAGE))
 
     while CHECK_REPEATEDLY:
         print("Sleeping", DELAY_BETWEEN_CHECKS, "minutes before next check.")
         time.sleep(DELAY_BETWEEN_CHECKS * 60) # seconds
         print("Waking up!")
         try:
-            poll_and_email(notification_helper)
+            poll_and_notify(notification_helpers)
         except Exception as e:
             # if we get an exception now, it may have been some temporary
             # problem accessing the website, let's just ignore it and try
@@ -113,7 +115,7 @@ def main():
             print(f"{e.__class__.__name__}: {e}")
             print("Hopefully it won't happen again. Continuing.")
 
-def poll_and_email(notification_helper: NotificationHelper):
+def poll_and_notify(notification_helpers):
     """
     Check for an updated WAM, and send an email notification if any change is
     detected.
@@ -142,13 +144,14 @@ def poll_and_email(notification_helper: NotificationHelper):
     elif new_wam < old_wam:
         message_template = DECREASE_MESSAGE_TEMPLATE
     else:
-        print("No change to WAM---stop before sending an email.")
+        print("No change to WAM---stop before triggering notifications.")
         return
 
     # compose and send the message
     message = message_template.format(before=old_wam, after=new_wam)
     email_text = EMAIL_TEMPLATE.format(message=message)
-    notification_helper.notify(SUBJECT, email_text)
+    for notification_helper in notification_helpers:
+        notification_helper.notify(SUBJECT, email_text)
     
     # update the wam file for next time
     with open(WAM_FILENAME, 'w') as wamfile:
@@ -223,24 +226,30 @@ def scrape_wam(username=UNIMELB_USERNAME, password=UNIMELB_PASSWORD):
 def select_notification_method() -> NotificationHelper:
     print()
 
-    methods = ["Email", "PushBullet", "ServerChan (WeChat)", "Telegram Bot", "IFTTT Webhook"]
+    methods = [
+        ("Email", partial(EmailNotification, UNIMELB_USERNAME, UNIMELB_PASSWORD)),
+        ("Pushbullet", PushBulletNotification),
+        ("ServerChan (WeChat)", ServerChanNotification),
+        ("Telegram Bot", TelegramBotNotification),
+        ("IFTTT Webhook", IFTTTWebhookNotification),
+        ("Desktop Notifications", DesktopNotification),
+        ("Log File", LogFile)
+    ]
     for i, m in enumerate(methods):
-        print("{}: {}".format(i, m))
-    i = int(input("Please select a notification method [0]:") or 0)
-    print(methods[i])
+        print("{}: {}".format(i, m[0]))
+    inp = input("Please select your preferred notification method(s) (comma delimited): ")
+    try:
+        selected = set([int(i) for i in inp.split(',')])
+        print("You have selected:", ", ".join([methods[i][0] for i in selected]))
+    except:
+        print(f"There was an error in your input, defaulting to method 0: {methods[0][0]}")
+        return [methods[0][1]()]
 
-    if i == 0:
-        return EmailNotification(UNIMELB_USERNAME, UNIMELB_PASSWORD)
-    elif i == 1:
-        return PushBulletNotification()
-    elif i == 2:
-        ServerChanNotification()
-    elif i == 3:
-        TelegramBotNotification()
-    elif i == 4:
-        IFTTTWebhookNotification()
-    else:
-        print(i, "is not a invalid choice. Please try again.")
+    helpers = []
+    for i in selected:
+        helpers.append(methods[i][1]())
+
+    return helpers
 
 
 if __name__ == '__main__':
