@@ -6,12 +6,11 @@ update, and then send the student a self-email if anything changed
 """
 import time
 import getpass
+import smtplib
+from email.mime.text import MIMEText
 
 import requests
 from bs4 import BeautifulSoup
-
-from functools import partial
-from notification import *
 
 
 # # #
@@ -43,7 +42,7 @@ WAM_FILENAME = "wam.txt"
 # if you have multiple degrees, set this to the id of the degree with the WAM
 # you want the script to watch (0, 1, 2, ... based on order from results page).
 # if you only have a single degree, you can ignore this one.
-DEGREE_INDEX = int(input("Degree index (or just press enter): ") or 0)
+DEGREE_INDEX = 0
 
 # select the HTML parser for BeautifulSoup to use. in most cases, you won't
 # have to touch this.
@@ -53,6 +52,13 @@ BS4_PARSER = "html.parser"
 # # #
 # EMAIL CONFIGURATION
 # 
+
+# the script will send email from and to your student email address.
+# if you need to use an app-specific password to get around 2FA on
+# your email account, or other authentication issues, you can set it
+# here as the value of EMAIL_PASSWORD.
+EMAIL_ADDRESS  = UNIMELB_USERNAME + "@student.unimelb.edu.au"
+EMAIL_PASSWORD = UNIMELB_PASSWORD
 
 # here we specify the format of the email messages (customise to your liking)
 SUBJECT = "WAM Update Detected"
@@ -84,6 +90,11 @@ every so often---unless I crash! Every now and then you
 should probably check to make sure nothing has gone wrong.
 """
 
+# these are unlikely to change
+UNIMELB_SMTP_HOST = "smtp.gmail.com"
+UNIMELB_SMTP_PORT = 587
+
+
 # let's get to it!
 
 def main():
@@ -92,21 +103,16 @@ def main():
     # check fails this first time, it's likely to be a configuration problem
     # (e.g. wrong username/password) so we should crash the script to let the
     # user know.
-
-    # notification_helper = EmailNotification(UNIMELB_USERNAME, UNIMELB_PASSWORD)
-    notification_helpers = select_notification_method()
-
-    poll_and_notify(notification_helpers)
+    poll_and_email()
     # also send a test message to make sure the email configuration is working
-    for notification_helper in notification_helpers:
-        notification_helper.notify(HELLO_SUBJECT, EMAIL_TEMPLATE.format(message=HELLO_MESSAGE))
+    email_self(HELLO_SUBJECT, EMAIL_TEMPLATE.format(message=HELLO_MESSAGE))
 
     while CHECK_REPEATEDLY:
         print("Sleeping", DELAY_BETWEEN_CHECKS, "minutes before next check.")
         time.sleep(DELAY_BETWEEN_CHECKS * 60) # seconds
         print("Waking up!")
         try:
-            poll_and_notify(notification_helpers)
+            poll_and_email()
         except Exception as e:
             # if we get an exception now, it may have been some temporary
             # problem accessing the website, let's just ignore it and try
@@ -115,7 +121,7 @@ def main():
             print(f"{e.__class__.__name__}: {e}")
             print("Hopefully it won't happen again. Continuing.")
 
-def poll_and_notify(notification_helpers):
+def poll_and_email():
     """
     Check for an updated WAM, and send an email notification if any change is
     detected.
@@ -144,14 +150,13 @@ def poll_and_notify(notification_helpers):
     elif new_wam < old_wam:
         message_template = DECREASE_MESSAGE_TEMPLATE
     else:
-        print("No change to WAM---stop before triggering notifications.")
+        print("No change to WAM---stop before sending an email.")
         return
 
     # compose and send the message
     message = message_template.format(before=old_wam, after=new_wam)
     email_text = EMAIL_TEMPLATE.format(message=message)
-    for notification_helper in notification_helpers:
-        notification_helper.notify(SUBJECT, email_text)
+    email_self(SUBJECT, email_text)
     
     # update the wam file for next time
     with open(WAM_FILENAME, 'w') as wamfile:
@@ -223,33 +228,36 @@ def scrape_wam(username=UNIMELB_USERNAME, password=UNIMELB_PASSWORD):
 
     return wam_text
 
-def select_notification_method() -> NotificationHelper:
-    print()
 
-    methods = [
-        ("Email", partial(EmailNotification, UNIMELB_USERNAME, UNIMELB_PASSWORD)),
-        ("Pushbullet", PushBulletNotification),
-        ("ServerChan (WeChat)", ServerChanNotification),
-        ("Telegram Bot", TelegramBotNotification),
-        ("IFTTT Webhook", IFTTTWebhookNotification),
-        ("Desktop Notifications", DesktopNotification),
-        ("Log File", LogFile)
-    ]
-    for i, m in enumerate(methods):
-        print("{}: {}".format(i, m[0]))
-    inp = input("Please select your preferred notification method(s) (comma delimited): ")
-    try:
-        selected = set([int(i) for i in inp.split(',')])
-        print("You have selected:", ", ".join([methods[i][0] for i in selected]))
-    except:
-        print(f"There was an error in your input, defaulting to method 0: {methods[0][0]}")
-        return [methods[0][1]()]
+def email_self(subject, text, address=EMAIL_ADDRESS, password=EMAIL_PASSWORD):
+    """
+    Send an email from the student to the student (with provided email address
+    and password)
 
-    helpers = []
-    for i in selected:
-        helpers.append(methods[i][1]())
+    :param subject: The email subject line
+    :param text: The email body text
+    :param address: The email address to use (as SMTP login username, email 
+                    sender, and email recipient)
+    :param password: The password to use for SMTP server login.
+    """
+    print("Sending an email to self...")
+    print("From/To:", address)
+    print("Subject:", subject)
+    print("Message:", '"""', text, '"""', sep="\n")
+    
+    # make the email object
+    msg = MIMEText(text)
+    msg['To'] = address
+    msg['From'] = f"WAM Spammer <{address}>"
+    msg['Subject'] = subject
 
-    return helpers
+    # log into the unimelb student email SMTP server (gmail) to send it
+    s = smtplib.SMTP(UNIMELB_SMTP_HOST, UNIMELB_SMTP_PORT)
+    s.ehlo(); s.starttls()
+    s.login(address, password)
+    s.sendmail(address, [address], msg.as_string())
+    s.quit()
+    print("Sent!")
 
 
 if __name__ == '__main__':

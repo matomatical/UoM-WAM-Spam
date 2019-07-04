@@ -21,7 +21,7 @@ The WAM Spam script has the following dependencies:
 
 While the script has sensible default settings, it's also easily configurable. You can modify the constants atop `wamspam.py` to easily change the behaviour. Some important configuration options are:
 
-* `DEGREE_INDEX`: **This one's important!** If you have multiple degrees, then you need to tell the script which degree's WAM you want it to monitor. Just specify a (zero-based) index into the list of degrees on your results page (0 for the top degree in the list, 1 for the second, and so on). If you only have a single degree, you can leave this value.
+* `DEGREE_INDEX`: **This one's important!** If you have multiple degrees, then you need oto tell the script which degree's WAM you want it to monitor. Just specify a (zero-based) index into the list of degrees on your results page (0 for the top degree in the list, 1 for the second, and so on). If you only have a single degree, you can leave this value.
 
 
 * `CHECK_REPEATEDLY`: By default, the script will repeatedly check your WAM until you kill it. If you want the script to check your WAM only once, set this to `False`.
@@ -39,10 +39,6 @@ The script will ask you for your unimelb username and password. It uses these to
 The first time the script finds your WAM, or whenever it sees your WAM change, the script will also log in to your university email and send you a self-email notifying you about the WAM change. Now you can compulsively check your email, instead of compulsively checking the results page! Haha.
 
 > Note: Don't forget to stop the script after the final results release date!
-
-### Notification Options
-
-If you would like to use desktop notifications, install the `notify2` package: `pip install notify2`
 
 ### Common issues
 
