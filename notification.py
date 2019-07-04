@@ -1,5 +1,7 @@
 import smtplib
 from email.mime.text import MIMEText
+from inspect import cleandoc
+
 import requests
 from pushbullet import Pushbullet
 
@@ -93,3 +95,109 @@ class PushBulletNotification(NotificationHelper):
             print("Sent!")
         else:
             raise Exception(str(push))
+
+
+class TelegramBotNotification(NotificationHelper):
+    """
+    Send notification using Telegram Bot API.
+
+    Telegram bot can be created with @BotFather (https://t.me/botfather).
+    """
+
+    def __init__(self) -> None:
+        print(cleandoc("""
+        Setup Telegram bot notifications
+        ================================
+
+        Please provide your Telegram bot access token. Your token can be 
+        obtained from @BotFather (https://t.me/botfather), and should in the 
+        following format:
+
+            123456789:AaBbCcDdEeFfGgHhIiJjKkLlMm
+        
+        If you don't yet have a bot, you can make one with @BotFather.
+        """))
+        self.token = input("Access token: ")
+        print(cleandoc("""
+
+        Please provide your destination of messages. This should be:
+
+            - a numerical ID of a user, group or channel, which can be obtained
+              with bots like @GetIDBot (https://t.me/getidbot)
+            - Username of a *public group*, e.g. @lyricova
+        
+        """))
+        self.chat = input("Destination: ")
+
+        print(cleandoc("""
+
+        Now you are all set. Please make sure to send at least a message to 
+        the bot if you just created one, and ensure that the bot is able to
+        deliver message to your destination.
+        """))
+
+        self.entry_point = f"https://api.telegram.org/bot{self.token}/sendMessage"
+
+    def notify(self, subject: str, text: str) -> None:
+        print("Message:", '"""', text, '"""', sep="\n")
+
+        data = {
+            "text": f"<b>{subject}</b>\n\n{text}",
+            "chat_id": self.chat,
+            "parse_mode": "html",
+            "disable_web_page_preview": True
+        }
+
+        r = requests.post(self.entry_point, json=data)
+        if r.status_code == 200:
+            print("Sent!", r.text)
+        else:
+            raise Exception(r.status_code, r.text)
+
+
+class IFTTTWebhookNotification(NotificationHelper):
+    """
+    Send notification using IFTTT WebHook.
+
+    You can obtain your webhook key at https://ifttt.com/maker_webhooks.
+
+    Messages will be sent in "wam-spam" event, with "value1" as the title,
+    and "value2" as the body text.
+    """
+
+    def __init__(self) -> None:
+        print(cleandoc("""
+        Setup IFTTT webhook notifications
+        ================================
+
+        Please provide your IFTTT webhook key. Your key can be retrieved at
+        https://ifttt.com/maker_webhooks., and should in the following format:
+
+            Aa0Bb1Cc2Dd3Ee4Ff5Gg6H
+
+        """))
+        self.key = input("Webhook key: ")
+
+        print(cleandoc("""
+
+        Now you are all set. Following messages will be sent with 
+        "wam-spam" event, with "value1" as the title, and "value2" as the 
+        body text. Any applet setup with the propper event will be triggered
+        when an update is available
+        """))
+
+        self.entry_point = f"https://maker.ifttt.com/trigger/wam-spam/with/key/{self.key}"
+
+    def notify(self, subject: str, text: str) -> None:
+        print("Message:", '"""', text, '"""', sep="\n")
+
+        data = {
+            "value1": subject,
+            "value2": text
+        }
+
+        r = requests.post(self.entry_point, json=data)
+        if r.status_code == 200:
+            print("Triggered!", r.text)
+        else:
+            raise Exception(r.status_code, r.text)

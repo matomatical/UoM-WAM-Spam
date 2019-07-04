@@ -223,16 +223,24 @@ def scrape_wam(username=UNIMELB_USERNAME, password=UNIMELB_PASSWORD):
 def select_notification_method() -> NotificationHelper:
     print()
 
-    methods = ["Email", "PushBullet", "ServerChan (WeChat)"]
+    methods = ["Email", "PushBullet", "ServerChan (WeChat)", "Telegram Bot", "IFTTT Webhook"]
     for i, m in enumerate(methods):
         print("{}: {}".format(i, m))
-    i = int(input("Please select a notification method:") or 0)
+    i = int(input("Please select a notification method [0]:") or 0)
     print(methods[i])
 
     if i == 0:
         return EmailNotification(UNIMELB_USERNAME, UNIMELB_PASSWORD)
+    elif i == 1:
+        return PushBulletNotification()
+    elif i == 2:
+        ServerChanNotification()
+    elif i == 3:
+        TelegramBotNotification()
+    elif i == 4:
+        IFTTTWebhookNotification()
     else:
-        return PushBulletNotification() if i == 1 else ServerChanNotification()
+        print(i, "is not a invalid choice. Please try again.")
 
 
 if __name__ == '__main__':
