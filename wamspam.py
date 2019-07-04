@@ -10,9 +10,6 @@ import getpass
 import requests
 from bs4 import BeautifulSoup
 
-from functools import partial
-from notification import *
-
 
 # # #
 # SCRIPT CONFIGURATION
@@ -51,13 +48,13 @@ BS4_PARSER = "html.parser"
 
 
 # # #
-# EMAIL CONFIGURATION
+# NOTIFICATION CONFIGURATION
 # 
 
 # here we specify the format of the email messages (customise to your liking)
-SUBJECT = "WAM Update Detected"
-EMAIL_TEMPLATE = """Hello there!
-{message}
+MESSAGE_SUBJECT = "WAM Update Detected"
+MESSAGE_TEMPLATE = """Hello there!
+{}
 Love,
 WAM Spammer
 """
@@ -84,29 +81,66 @@ every so often---unless I crash! Every now and then you
 should probably check to make sure nothing has gone wrong.
 """
 
+
+# choose a notification method
+
+# option 1: student email notification, via SMTP
+from notify.by_email import EmailNotifier
+# the script will send email from and to your student email address.
+# if you need to use an app-specific password to get around 2FA on
+# your email account, or other authentication issues, you can set it
+# here as the value of password.
+NOTIFIER = SMTPEmailNotifier(
+            address=UNIMELB_USERNAME + "@student.unimelb.edu.au", 
+            password=UNIMELB_PASSWORD,
+            smtp_host="smtp.gmail.com",
+            smtp_port=587)
+
+# option 2: wechat notification via ServerChan
+# from notify.by_wechat import ServerChanNotifier
+# NOTIFIER = ServerChanNotifier(input("ServerChan API key: "))
+
+# option 3:  sms notification via pushbullet
+# from notify.by_sms import PushBulletNotifier
+# NOTIFIER = PushBulletNotifier(input("Pushbullet Access Token: "))
+
+# option 4: telegram notification via a telegram bot
+# from notify.by_telegram import TelegramBotNotifier, setup as telegram_setup
+# NOTIFIER = TelegramBotNotifier(*telegram_setup())
+
+# option 5: ifttt notification via triggering a webhook
+# from notify.by_ifttt import IFTTTWebhookNotifier, setup as ifttt_setup
+# NOTIFIER = IFTTTWebhookNotifier(*ifttt_setup())
+
+# option 6: desktop notifications using notify2 python library
+# from notify.by_desktop import DesktopNotifier
+# NOTIFIER = DesktopNotifier()
+
+# option 7: notifications via appending to a local filε
+# from notify.by_file import LogFileNotifier
+# NOTIFIER = LogFileNotifier(input("Filepath to log WAM changes to: "))
+
+
+
 # let's get to it!
 
 def main():
     """Run the checking script, once or forever, depending on configuration."""
+    # send a test message to make sure the notification configuration is working
+    NOTIFIER.notify(HELLO_SUBJECT, MESSAGE_TEMPLATE.format(HELLO_MESSAGE))
+
     # conduct the first check! don't catch any exceptions here, if the
     # check fails this first time, it's likely to be a configuration problem
     # (e.g. wrong username/password) so we should crash the script to let the
     # user know.
-
-    # notification_helper = EmailNotification(UNIMELB_USERNAME, UNIMELB_PASSWORD)
-    notification_helpers = select_notification_method()
-
-    poll_and_notify(notification_helpers)
-    # also send a test message to make sure the email configuration is working
-    for notification_helper in notification_helpers:
-        notification_helper.notify(HELLO_SUBJECT, EMAIL_TEMPLATE.format(message=HELLO_MESSAGE))
+    poll_and_notify()
 
     while CHECK_REPEATEDLY:
         print("Sleeping", DELAY_BETWEEN_CHECKS, "minutes before next check.")
         time.sleep(DELAY_BETWEEN_CHECKS * 60) # seconds
         print("Waking up!")
         try:
-            poll_and_notify(notification_helpers)
+            poll_and_notify()
         except Exception as e:
             # if we get an exception now, it may have been some temporary
             # problem accessing the website, let's just ignore it and try
@@ -115,10 +149,10 @@ def main():
             print(f"{e.__class__.__name__}: {e}")
             print("Hopefully it won't happen again. Continuing.")
 
-def poll_and_notify(notification_helpers):
+
+def poll_and_notify():
     """
-    Check for an updated WAM, and send an email notification if any change is
-    detected.
+    Check for an updated WAM, and send a notification if any change is detected.
     """
     # check the results page for the updated WAM
     new_wam_text = scrape_wam()
@@ -147,11 +181,9 @@ def poll_and_notify(notification_helpers):
         print("No change to WAM---stop before triggering notifications.")
         return
 
-    # compose and send the message
+    # compose and send the notification
     message = message_template.format(before=old_wam, after=new_wam)
-    email_text = EMAIL_TEMPLATE.format(message=message)
-    for notification_helper in notification_helpers:
-        notification_helper.notify(SUBJECT, email_text)
+    NOTIFIER.notify(MESSAGE_SUBJECT, MESSAGE_TEMPLATE.format(message))
     
     # update the wam file for next time
     with open(WAM_FILENAME, 'w') as wamfile:
@@ -222,34 +254,6 @@ def scrape_wam(username=UNIMELB_USERNAME, password=UNIMELB_PASSWORD):
             wam_text = None
 
     return wam_text
-
-def select_notification_method() -> NotificationHelper:
-    print()
-
-    methods = [
-        ("Email", partial(EmailNotification, UNIMELB_USERNAME, UNIMELB_PASSWORD)),
-        ("Pushbullet", PushBulletNotification),
-        ("ServerChan (WeChat)", ServerChanNotification),
-        ("Telegram Bot", TelegramBotNotification),
-        ("IFTTT Webhook", IFTTTWebhookNotification),
-        ("Desktop Notifications", DesktopNotification),
-        ("Log File", LogFile)
-    ]
-    for i, m in enumerate(methods):
-        print("{}: {}".format(i, m[0]))
-    inp = input("Please select your preferred notification method(s) (comma delimited): ")
-    try:
-        selected = set([int(i) for i in inp.split(',')])
-        print("You have selected:", ", ".join([methods[i][0] for i in selected]))
-    except:
-        print(f"There was an error in your input, defaulting to method 0: {methods[0][0]}")
-        return [methods[0][1]()]
-
-    helpers = []
-    for i in selected:
-        helpers.append(methods[i][1]())
-
-    return helpers
 
 
 if __name__ == '__main__':
