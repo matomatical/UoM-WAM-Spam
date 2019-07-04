@@ -58,6 +58,10 @@ The first time the script finds your WAM, or whenever it sees your WAM change, t
 
 > Note: Don't forget to stop the script after the final results release date!
 
+### Notification Options
+
+If you would like to use desktop notifications, install the `notify2` package: `pip install notify2`
+
 ### Common issues
 
 The script is not very robust. If anything goes wrong, it will probably crash with an overly dramatic error message. Please see these possible errors:

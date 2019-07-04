@@ -49,25 +49,13 @@ BS4_PARSER = "html.parser"
 
 
 # # #
-# EMAIL CONFIGURATION
-#
-
-# set this to True (not recommended) if you would like to use SMTP with legacy
-# username and password authentication instead of the Gmail API with OAuth 2.0.
-# if this is set to True, you must enable access by less secure apps in your
-# settings (https://myaccount.google.com/u/2/lesssecureapps?pageId=none).
-LEGACY_AUTH = False
-
-# the script will send email from and to this student email address.
-EMAIL_ADDRESS = UNIMELB_USERNAME + "@student.unimelb.edu.au"
-
-# this field is only used if LEGACY_AUTH == True
-EMAIL_PASSWORD = UNIMELB_PASSWORD
+# NOTIFICATION CONFIGURATION
+# 
 
 # here we specify the format of the email messages (customise to your liking)
-SUBJECT = "WAM Update Detected"
-EMAIL_TEMPLATE = """Hello there!
-{message}
+MESSAGE_SUBJECT = "WAM Update Detected"
+MESSAGE_TEMPLATE = """Hello there!
+{}
 Love,
 WAM Spammer
 """
@@ -94,43 +82,69 @@ every so often---unless I crash! Every now and then you
 should probably check to make sure nothing has gone wrong.
 """
 
-# these are only used if LEGACY_AUTH == True and are unlikely to change
-UNIMELB_SMTP_HOST = "smtp.gmail.com"
-UNIMELB_SMTP_PORT = 587
+
+# choose a notification method
+
+# option 1: student email notification, via SMTP
+from notify.by_email_simple import SMTPEmailNotifier
+# the script will send email from and to your student email address.
+# if you need to use an app-specific password to get around 2FA on
+# your email account, or other authentication issues, you can set it
+# here as the value of password.
+NOTIFIER = SMTPEmailNotifier(
+            address=UNIMELB_USERNAME + "@student.unimelb.edu.au", 
+            password=UNIMELB_PASSWORD,
+            smtp_host="smtp.gmail.com",
+            smtp_port=587)
+
+# option 2: student email notification, via Gmail's API + OAuth
+# from notify.by_email_oauth import Gmail
+# NOTIFIER = GmailAPINotifier()
+
+# option 3: wechat notification via ServerChan
+# from notify.by_wechat import ServerChanNotifier
+# NOTIFIER = ServerChanNotifier(input("ServerChan API key: "))
+
+# option 4:  sms notification via pushbullet
+# from notify.by_sms import PushBulletNotifier
+# NOTIFIER = PushBulletNotifier(input("Pushbullet Access Token: "))
+
+# option 5: telegram notification via a telegram bot
+# from notify.by_telegram import TelegramBotNotifier, setup as telegram_setup
+# NOTIFIER = TelegramBotNotifier(*telegram_setup())
+
+# option 6: ifttt notification via triggering a webhook
+# from notify.by_ifttt import IFTTTWebhookNotifier, setup as ifttt_setup
+# NOTIFIER = IFTTTWebhookNotifier(*ifttt_setup())
+
+# option 7: desktop notifications using notify2 python library
+# from notify.by_desktop import DesktopNotifier
+# NOTIFIER = DesktopNotifier()
+
+# option 8: notifications via appending to a local filε
+# from notify.by_file import LogFileNotifier
+# NOTIFIER = LogFileNotifier(input("Filepath to log WAM changes to: "))
 
 
 # let's get to it!
 
 def main():
     """Run the checking script, once or forever, depending on configuration."""
-    # initialise the mailer depending on configuration value
-    if LEGACY_AUTH:
-        mailer = SMTPMailer(smtp_host=UNIMELB_SMTP_HOST,
-                            smtp_port=UNIMELB_SMTP_PORT,
-                            email=EMAIL_ADDRESS, password=EMAIL_PASSWORD)
-    else:
-        # you will be asked to grant email permissions if this is the first time
-        # running the script.
-        mailer = APIMailer()
+    # send a test message to make sure the notification configuration is working
+    NOTIFIER.notify(HELLO_SUBJECT, MESSAGE_TEMPLATE.format(HELLO_MESSAGE))
 
     # conduct the first check! don't catch any exceptions here, if the
     # check fails this first time, it's likely to be a configuration problem
     # (e.g. wrong username/password) so we should crash the script to let the
     # user know.
-    poll_and_email(mailer)
-    # also send a test message to make sure the email configuration is working
-    message = mailer.create_message(sender=f'WAM Spammer <{EMAIL_ADDRESS}>',
-                                    to=EMAIL_ADDRESS, subject=HELLO_SUBJECT,
-                                    body=EMAIL_TEMPLATE.format(
-                                        message=HELLO_MESSAGE))
-    mailer.send_message(message)
+    poll_and_notify()
 
     while CHECK_REPEATEDLY:
         print("Sleeping", DELAY_BETWEEN_CHECKS, "minutes before next check.")
         time.sleep(DELAY_BETWEEN_CHECKS * 60) # seconds
         print("Waking up!")
         try:
-            poll_and_email(mailer)
+            poll_and_notify()
         except Exception as e:
             # if we get an exception now, it may have been some temporary
             # problem accessing the website, let's just ignore it and try
@@ -139,12 +153,10 @@ def main():
             print(f"{e.__class__.__name__}: {e}")
             print("Hopefully it won't happen again. Continuing.")
 
-def poll_and_email(mailer):
-    """
-    Check for an updated WAM, and send an email notification if any change is
-    detected.
 
-    :param mailer: The Mailer object used for sending emails
+def poll_and_notify():
+    """
+    Check for an updated WAM, and send a notification if any change is detected.
     """
     # check the results page for the updated WAM
     new_wam_text = scrape_wam()
@@ -170,17 +182,13 @@ def poll_and_email(mailer):
     elif new_wam < old_wam:
         message_template = DECREASE_MESSAGE_TEMPLATE
     else:
-        print("No change to WAM---stop before sending an email.")
+        print("No change to WAM---stop before triggering notifications.")
         return
 
-    # compose and send the message
-    wam_text = message_template.format(before=old_wam, after=new_wam)
-    body_text = EMAIL_TEMPLATE.format(message=wam_text)
-    message = mailer.create_message(sender=f'WAM Spammer <{EMAIL_ADDRESS}>',
-                                    to=EMAIL_ADDRESS, subject=SUBJECT,
-                                    body=body_text)
-    mailer.send_message(user_id='me', message=message)
-
+    # compose and send the notification
+    message = message_template.format(before=old_wam, after=new_wam)
+    NOTIFIER.notify(MESSAGE_SUBJECT, MESSAGE_TEMPLATE.format(message))
+    
     # update the wam file for next time
     with open(WAM_FILENAME, 'w') as wamfile:
         wamfile.write(f"{new_wam}\n")
