@@ -97,7 +97,7 @@ NOTIFIER = SMTPEmailNotifier(
             smtp_port=587)
 
 # option 2: student email notification, via Gmail's API + OAuth
-# from notify.by_email_oauth import Gmail
+# from notify.by_email_oauth import GmailAPINotifier
 # NOTIFIER = GmailAPINotifier()
 
 # option 3: wechat notification via ServerChan
