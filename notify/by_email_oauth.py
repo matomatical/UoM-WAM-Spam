@@ -34,6 +34,7 @@ class GmailAPINotifier:
         Initialise a Mailer object. Prompt the user to authenticate and
         provide mailing permissions if required.
         """
+        self.address = address
         self.creds = None
         # if there's an access token from previous authentication, load it
         if os.path.exists(self.ACCESS_TOKEN_PATH):
