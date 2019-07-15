@@ -2,7 +2,7 @@
 """
 OAuth/Gmail API-based email notifier
 
-:author: alanung, but then ruined by Matthew Farrugia-Roberts
+:author: alanung and Matthew Farrugia-Roberts
 """
 
 import base64
