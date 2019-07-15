@@ -10,7 +10,6 @@ import getpass
 import requests
 from bs4 import BeautifulSoup
 
-from mailer import APIMailer, SMTPMailer
 
 # # #
 # SCRIPT CONFIGURATION
