@@ -98,7 +98,7 @@ NOTIFIER = SMTPEmailNotifier(
 
 # option 2: student email notification, via Gmail's API + OAuth
 # from notify.by_email_oauth import GmailAPINotifier
-# NOTIFIER = GmailAPINotifier()
+# NOTIFIER = GmailAPINotifier(UNIMELB_USERNAME + "@student.unimelb.edu.au")
 
 # option 3: wechat notification via ServerChan
 # from notify.by_wechat import ServerChanNotifier
