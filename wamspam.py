@@ -19,12 +19,12 @@ from bs4 import BeautifulSoup
 # page, or False if you only want it to run once
 CHECK_REPEATEDLY = True
 
-# if you set the script to check repeatedly above, you can configure the delay 
+# if you set the script to check repeatedly above, you can configure the delay
 # between WAM checks in minutes here
 DELAY_BETWEEN_CHECKS = 60 # minutes
 
-# leave these lines unchanged to be prompted for your username and password 
-# every time you run the script, or just hard code your credentials here if 
+# leave these lines unchanged to be prompted for your username and password
+# every time you run the script, or just hard code your credentials here if
 # you're lazy (but then be careful not to let anyone else see this file)
 UNIMELB_USERNAME = input("Username: ")
 UNIMELB_PASSWORD = getpass.getpass()
@@ -40,7 +40,7 @@ WAM_FILENAME = "wam.txt"
 # if you have multiple degrees, set this to the id of the degree with the WAM
 # you want the script to watch (0, 1, 2, ... based on order from results page).
 # if you only have a single degree, you can ignore this one.
-DEGREE_INDEX = int(input("Degree index (or just press enter): ") or 0)
+DEGREE_INDEX = 0
 
 # select the HTML parser for BeautifulSoup to use. in most cases, you won't
 # have to touch this.
@@ -49,7 +49,7 @@ BS4_PARSER = "html.parser"
 
 # # #
 # NOTIFICATION CONFIGURATION
-# 
+#
 
 # here we specify the format of the email messages (customise to your liking)
 MESSAGE_SUBJECT = "WAM Update Detected"
@@ -91,7 +91,7 @@ from notify.by_email import EmailNotifier
 # your email account, or other authentication issues, you can set it
 # here as the value of password.
 NOTIFIER = SMTPEmailNotifier(
-            address=UNIMELB_USERNAME + "@student.unimelb.edu.au", 
+            address=UNIMELB_USERNAME + "@student.unimelb.edu.au",
             password=UNIMELB_PASSWORD,
             smtp_host="smtp.gmail.com",
             smtp_port=587)
@@ -184,7 +184,7 @@ def poll_and_notify():
     # compose and send the notification
     message = message_template.format(before=old_wam, after=new_wam)
     NOTIFIER.notify(MESSAGE_SUBJECT, MESSAGE_TEMPLATE.format(message))
-    
+
     # update the wam file for next time
     with open(WAM_FILENAME, 'w') as wamfile:
         wamfile.write(f"{new_wam}\n")
