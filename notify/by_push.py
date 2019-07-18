@@ -1,14 +1,14 @@
 """
-pushbullet-based SMS notifier
+pushbullet-based notifier
 
 :author: CaviarChen and josephsurin
 """
 
 import requests
 
-class PushBulletNotifier:
+class PushbulletNotifier:
     """
-    Send notification using PushBullet.
+    Send notification using Pushbullet.
     https://www.pushbullet.com
     """
     def __init__(self, token: str) -> None:

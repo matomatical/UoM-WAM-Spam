@@ -100,9 +100,9 @@ NOTIFIER = SMTPEmailNotifier(
 # from notify.by_wechat import ServerChanNotifier
 # NOTIFIER = ServerChanNotifier(input("ServerChan API key: "))
 
-# option 3:  sms notification via pushbullet
-# from notify.by_sms import PushBulletNotifier
-# NOTIFIER = PushBulletNotifier(input("Pushbullet Access Token: "))
+# option 3: push notification via pushbullet
+# from notify.by_push import PushbulletNotifier
+# NOTIFIER = PushbulletNotifier(input("Pushbullet Access Token: "))
 
 # option 4: telegram notification via a telegram bot
 # from notify.by_telegram import TelegramBotNotifier, setup as telegram_setup
