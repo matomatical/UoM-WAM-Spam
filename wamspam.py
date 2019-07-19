@@ -85,7 +85,7 @@ should probably check to make sure nothing has gone wrong.
 # choose a notification method
 
 # option 1: student email notification, via SMTP
-from notify.by_email import EmailNotifier
+from notify.by_email import SMTPEmailNotifier
 # the script will send email from and to your student email address.
 # if you need to use an app-specific password to get around 2FA on
 # your email account, or other authentication issues, you can set it
@@ -100,13 +100,13 @@ NOTIFIER = SMTPEmailNotifier(
 # from notify.by_wechat import ServerChanNotifier
 # NOTIFIER = ServerChanNotifier(input("ServerChan API key: "))
 
-# option 3: push notification via pushbullet
-# from notify.by_push import PushbulletNotifier
-# NOTIFIER = PushbulletNotifier(input("Pushbullet Access Token: "))
-
-# option 4: telegram notification via a telegram bot
+# option 3: telegram notification via a telegram bot
 # from notify.by_telegram import TelegramBotNotifier, setup as telegram_setup
 # NOTIFIER = TelegramBotNotifier(*telegram_setup())
+
+# option 4: push notification via pushbullet
+# from notify.by_push import PushbulletNotifier
+# NOTIFIER = PushbulletNotifier(input("Pushbullet Access Token: "))
 
 # option 5: ifttt notification via triggering a webhook
 # from notify.by_ifttt import IFTTTWebhookNotifier, setup as ifttt_setup

@@ -1,62 +1,206 @@
 # UoM WAM Spam
 
-The official results release date is usually about two weeks after the end of the exam period. In practice, subject marks become visible a week or two earlier than the official release date, and can be inferred even earlier by detecting a change in calculated WAM (Weighted Average Mark) as soon as the results are in the system (days before the results themselves are made visible on the results page).
+The official results release date is usually about two weeks after
+the end of the exam period.  In practice, subject marks become visible
+a week or two earlier than the official release date, and can be
+inferred even earlier by detecting a change in calculated WAM (Weighted
+Average Mark) as soon as the results are in the system (days before the
+results themselves are made visible on the results page).
 
-This script periodically checks the my.unimelb results page to detect any changes to your WAM, and sends you an email when a change is detected. If you run this script in the background on your computer or on a VPS, you'll be free to enjoy the first few weeks of your holidays without compulsively checking the results page yourself! Or is it just me who does that?
+This script periodically checks the my.unimelb results page to detect
+any changes to your WAM, and sends you a notification when a change is
+detected. If you run this script in the background on your computer or
+on a VPS, you'll be free to enjoy the first few weeks of your holidays
+without compulsively checking the results page yourself!
+Or is it just me who does that?
 
-Made with :purple_heart: by Matt
+Made with :purple_heart: by Matt, with contributions from CaviarChen,
+blueset, josephsurin, and alanung.
 
 
 ## Installation
 
-The WAM Spam script has the following dependencies:
+Clone this repository to get started WAM Spamming!
 
-* [Python 3.6](https://www.python.org/) (or higher).
+The basic WAM Spam script requires [Python 3.6](https://www.python.org/)
+(or higher).
 
-* [Requests](https://2.python-requests.org/en/master/) and [beautifulsoup4](https://www.crummy.com/software/BeautifulSoup/bs4/doc/), third-party Python packages for web scraping.
-    * Easily install with [pip](https://pypi.python.org/pypi/pip) using the commands `pip3 install requests beautifulsoup4` or `pip3 install -r requirements.txt`, or however else you prefer to install Python packages.
+Once you have Python installed, you'll also need the following two
+third-party Python packages for web scraping:
+
+* [Requests](https://2.python-requests.org/en/master/), and 
+* [beautifulsoup4](https://www.crummy.com/software/BeautifulSoup/bs4/doc/).
+
+You can easily install these with [pip](https://pypi.python.org/pypi/pip)
+using the command `pip3 install requests beautifulsoup4`, or however else
+you prefer to install Python packages.
 
 
 ## Configuration
 
-While the script has sensible default settings, it's also easily configurable. You can modify the constants atop `wamspam.py` to easily change the behaviour. Some important configuration options are:
+While the script has sensible default settings, it's also easily configurable.
+You can modify the constants atop `wamspam.py` to easily change the behaviour.
+Some important configuration options are:
 
-* `DEGREE_INDEX`: **This one's important!** If you have multiple degrees, then you need to tell the script which degree's WAM you want it to monitor. Just specify a (zero-based) index into the list of degrees on your results page (0 for the top degree in the list, 1 for the second, and so on). If you only have a single degree, you can leave this value.
+* `DEGREE_INDEX`: **This one's important!** If you have multiple degrees,
+then you need to tell the script which degree's WAM you want it to monitor.
+Just specify a (zero-based) index into the list of degrees on your results
+page (0 for the top degree in the list, 1 for the second, and so on).
+If you only have a single degree, you can ignore this value.
 
+* `CHECK_REPEATEDLY`: By default, the script will repeatedly check your WAM
+until you kill it.
+If you want the script to check your WAM only once, set this to `False`.
 
-* `CHECK_REPEATEDLY`: By default, the script will repeatedly check your WAM until you kill it. If you want the script to check your WAM only once, set this to `False`.
-
-* `DELAY_BETWEEN_CHECKS`: You can configure how often the script logs in to check for results. I had mine set to check every 5 minutes (roughly the frequency at which I would be checking if it wasn't for this script). That seemed a bit excessive, so I changed it to check every hour. I'll probably speed it up when the results release date draws closer.
+* `DELAY_BETWEEN_CHECKS`: You can configure how often the script logs in to
+check for results.
+I had mine set to check every 5 minutes (roughly the frequency at which I
+would be checking if it wasn't for this script). 
 
 There are some other configuration options, all documented in the script itself.
 
+### Notifcation methods
+
+The script can notify you using a range of notification methods. Each requires
+its own configuration, as explained below:
+
+#### Student email (default)
+
+The default notifcation method.
+
+The script will log in to your university email account and send you a self-
+email notifying you about the WAM change.
+
+This option requires no configuration, but if you see an error (or similar):
+`smtplib.SMTPAuthenticationError: (535, b'5.7.8 Username and Password not accepted')`
+then Google must be blocking the script's attempt to log into your SMTP server.
+
+This is because Google thinks the way the script logs into your account does not
+meet their security standards.  One work-around is to go to: [your Google security
+settings](https://myaccount.google.com/u/2/lesssecureapps?pageId=none) and turn on
+the option to "allow less secure apps".
+You might like to remember to turn it off when you get your results.
+
+
+Also see the `oauth-contrib` branch for work to add an OAuth2.0-based email
+notification method.
+
+
+#### WeChat message
+
+The script will use the [ServerChan](https://sc.ftqq.com) API to send you a
+[WeChat](https://wechat.com) message.
+
+You'll need to acquire a WeChat account and a ServerChan API key.
+Set up your account and then enter your API key into the script at runtime.
+
+
+#### Telegram message
+
+The script will contact a Telegram Bot so that it may send you a Telegram
+message.
+
+You will need a [Telegram](https://telegram.org) account and a Telegram bot
+(which can be created using [@BotFather](https://t.me/botfather)).
+You'll then need a bot access token, which will be in the format:
+
+```
+123456789:AaBbCcDdEeFfGgHhIiJjKkLlMm
+```
+
+Set up your Telegram account and note the numerical user, group, or channel ID
+you wish to be contacted through. Then enter your access token and destination
+chat into the script at runtime.
+
+
+#### Push notifications (Pushbullet)
+
+The script will use the [Pushbullet](https://www.pushbullet.com) API to send
+you a push notification (to whichever devices you have their apps installed).
+
+You'll need to acquire a Pushbullet account and API Access Token for this.
+Set up your account and link your desired devices, then enter your API Access
+Token into the script at runtime.
+
+
+#### IFTTT webhook
+
+The script will trigger an [IFTTT](https://ifttt.com) webhook, which you can
+set up to contact you in any means supported by the IFTTT service.
+
+You'll need an IFTTT account and a webhook key. You can retrieve a key [here
+](https://ifttt.com/maker_webhooks), and should be in the format:
+
+```
+Aa0Bb1Cc2Dd3Ee4Ff5Gg6H
+```
+
+The script will send notification messages with the event `wam-spam`, with
+`value1` set to the subject of the notification and `value2` set to the
+body text. Set up an IFTTT applet to respond to this event, and enter the
+webhook key into the script at runtime.
+
+
+#### Desktop notification
+
+The script will trigger a desktop notification displaying the update.
+
+Desktop notifications require an additional third-party Python module,
+[notify2](notify2.readthedocs.org). First, install this package (e.g.
+`pip install notify2`).
+
+Depending on your platform, you may need to install support for desktop
+notifications. For example, for Arch linux, you'll need [libnotify and a
+notification server](https://wiki.archlinux.org/index.php/Desktop_notifications).
+
+
+#### Logfile message
+
+The script will log the notification message to a local file.
+
+The only configuration required is to enter the name of the desired file
+into the script at runtime.
+
+
+#### Multiple notification methods
+
+The script can combine multiple notification methods in its attempt to reach
+you regarding a detected WAM change.
+
+You'll need to configure each of your desired notification methods individually
+using the above instructions. Then, just ...
+
+TODO.
+
+
+
+
 ## Usage
 
-Once you have installed the requirements and configured the script, simply run it with `python3 wamspam.py`.
+Once you have installed the requirements and configured the script, simply run
+it with `python3 wamspam.py`.
 
-The script will ask you for your unimelb username and password. It uses these to log into the results page on your behalf every however-many minutes you configured, looking for your WAM. It stores the previous WAM in a text file between checks, for comparison.
+The script will ask you for your unimelb username and password. It uses these
+to log into the results page on your behalf every however-many minutes you
+configured, looking for your WAM. It stores the previous WAM in a text file
+between checks, for comparison.
 
-The first time the script finds your WAM, or whenever it sees your WAM change, the script will also log in to your university email and send you a self-email notifying you about the WAM change. Now you can compulsively check your email, instead of compulsively checking the results page! Haha.
+The first time the script finds your WAM, or whenever it sees your WAM change,
+the script will also send you a notification using your configured notification
+method(s).
 
 > Note: Don't forget to stop the script after the final results release date!
 
-### Notification Options
-
-If you would like to use desktop notifications, install the `notify2` package: `pip install notify2`
 
 ### Common issues
 
-The script is not very robust. If anything goes wrong, it will probably crash with an overly dramatic error message. Please see these possible errors:
+The script is not very robust.  If anything goes wrong, it will probably crash
+with an overly dramatic error message.  Please see these possible errors:
+
 
 ##### The script crashes with an error: `InvalidLoginException`.
 
-You might have typed your username or password wrong. Please check that you got them right, and try again.
+You might have typed your username or password wrong.
+Please check that you got them right, and try again.
 
 
-##### The script crashes when logging in to my email account, with error `smtplib.SMTPAuthenticationError: (535, b'5.7.8 Username and Password not accepted` or similar.
-
-It sounds like Google may be blocking the script's attempt to log in to its SMTP server. This is because Google thinks the way the script logs into your account does not meet google's security standards. The solution is to go to https://myaccount.google.com/u/2/lesssecureapps?pageId=none and turn the "allow less secure app" option on. Remember to turn it off when you get your results.
-
-There may be a proper fix for this related to how the script tries to authenticate, but I don't know anything about SMTP authentication.
-
-Also, see Issue #4.
