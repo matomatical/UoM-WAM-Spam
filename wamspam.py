@@ -83,13 +83,17 @@ every so often---unless I crash! Every now and then you
 should probably check to make sure nothing has gone wrong.
 """
 
+# we'll use a multi-notifier to allow for any number of
+# notification methods (added below)
+from notify.by_multiple import MultiNotifier
+NOTIFIER = MultiNotifier()
 
-# choose a notification method
-# in most cases you can configure the notification method with the
-# required secrets by including them in the corresponding script,
-# or by leaving the scripts alone and typing them in at start-up time
-# (see README for per-method instructions, and remember to keep your
-# secrets safe)
+# choose one or more notification methods to use when a change is detected.
+
+# in most cases you can configure the notification method with the required
+# secrets by including them in the corresponding script, or by leaving the
+# scripts alone and typing them in at start-up time (see README for per-method
+# instructions, and remember to keep your secrets safe!)
 print("Configuring chosen notification method(s)...")
 
 # option 1: student email notification, via SMTP
@@ -98,33 +102,33 @@ from notify.by_email import SMTPGmailNotifier
 # if you need to use an app-specific password to get around 2FA on
 # your email account, or other authentication issues, you can set it
 # here as the value of password.
-NOTIFIER = SMTPGmailNotifier(
-            address=UNIMELB_USERNAME + "@student.unimelb.edu.au",
-            password=UNIMELB_PASSWORD)
+NOTIFIER.add_notifier(SMTPGmailNotifier(
+    address=UNIMELB_USERNAME + "@student.unimelb.edu.au",
+    password=UNIMELB_PASSWORD))
 
 # option 2: wechat notification via ServerChan
 # from notify.by_wechat import ServerChanNotifier
-# NOTIFIER = ServerChanNotifier()
+# NOTIFIER.add_notifier(ServerChanNotifier())
 
 # option 3: telegram notification via a telegram bot
 # from notify.by_telegram import TelegramBotNotifier
-# NOTIFIER = TelegramBotNotifier()
+# NOTIFIER.add_notifier(TelegramBotNotifier())
 
 # option 4: push notification via pushbullet
 # from notify.by_push import PushbulletNotifier
-# NOTIFIER = PushbulletNotifier()
+# NOTIFIER.add_notifier(PushbulletNotifier())
 
 # option 5: ifttt notification via triggering a webhook
 # from notify.by_ifttt import IFTTTWebhookNotifier
-# NOTIFIER = IFTTTWebhookNotifier()
+# NOTIFIER.add_notifier(IFTTTWebhookNotifier())
 
 # option 6: desktop notifications using notify2 python library
 # from notify.by_desktop import DesktopNotifier
-# NOTIFIER = DesktopNotifier()
+# NOTIFIER.add_notifier(DesktopNotifier())
 
 # option 7: notifications via appending to a local filε
 # from notify.by_file import LogFileNotifier
-# NOTIFIER = LogFileNotifier()
+# NOTIFIER.add_notifier(LogFileNotifier())
 
 
 

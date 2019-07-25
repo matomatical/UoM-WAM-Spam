@@ -174,11 +174,11 @@ into the script at runtime, or hard-code it into `notify/by_logfile.py`.
 The script can combine multiple notification methods in its attempt to reach
 you regarding a detected WAM change.
 
-You'll need to configure each of your desired notification methods individually
-using the above instructions. Then, just ...
-
-TODO.
-
+All you'll need to configure each of your desired notification methods
+individually using the above instructions, and ensure they all get added to the
+multi-notifier during the configuration section of the script. That is,
+to use multiple notification methods, just uncomment and configure multiple
+notification methods!
 
 
 
