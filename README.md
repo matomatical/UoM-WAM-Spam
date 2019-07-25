@@ -92,7 +92,9 @@ The script will use the [ServerChan](https://sc.ftqq.com) API to send you a
 [WeChat](https://wechat.com) message.
 
 You'll need to acquire a WeChat account and a ServerChan API key.
-Set up your account and then enter your API key into the script at runtime.
+Set up your account and then enter your API key into the script at runtime,
+or hard-code it into `notify/by_wechat.py`.
+Remember to keep your secrets safe!
 
 
 #### Telegram message
@@ -110,7 +112,9 @@ You'll then need a bot access token, which will be in the format:
 
 Set up your Telegram account and note the numerical user, group, or channel ID
 you wish to be contacted through. Then enter your access token and destination
-chat into the script at runtime.
+chat into the script at runtime, or hard-code them into
+`notify/by_telegram.py`.
+Remember to keep your secrets safe!
 
 
 #### Push notifications (Pushbullet)
@@ -120,7 +124,8 @@ you a push notification (to whichever devices you have their apps installed).
 
 You'll need to acquire a Pushbullet account and API Access Token for this.
 Set up your account and link your desired devices, then enter your API Access
-Token into the script at runtime.
+Token into the script at runtime, or hard-code them into `notify/by_push.py`.
+Remember to keep your secrets safe!
 
 
 #### IFTTT webhook
@@ -138,7 +143,9 @@ Aa0Bb1Cc2Dd3Ee4Ff5Gg6H
 The script will send notification messages with the event `wam-spam`, with
 `value1` set to the subject of the notification and `value2` set to the
 body text. Set up an IFTTT applet to respond to this event, and enter the
-webhook key into the script at runtime.
+webhook key into the script at runtime, or hard-code it into
+`notify/by_ifttt.py`.
+Remember to keep your secrets safe!
 
 
 #### Desktop notification
@@ -159,7 +166,7 @@ notification server](https://wiki.archlinux.org/index.php/Desktop_notifications)
 The script will log the notification message to a local file.
 
 The only configuration required is to enter the name of the desired file
-into the script at runtime.
+into the script at runtime, or hard-code it into `notify/by_logfile.py`.
 
 
 #### Multiple notification methods
