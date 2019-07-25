@@ -6,15 +6,17 @@ local file-based logging notifier
 
 from datetime import datetime
 
+
 class LogFileNotifier:
     """
     Writes 'notifications' to a local file.
     """
-    def __init__(self, filepath: str) -> None:
-        self.filepath = filepath
+    def __init__(self) -> None:
+        print("Configuring Log File Notifier...")
+        self.filepath = input("Filepath (see README):")
 
     def notify(self, subject: str, text: str) -> None:
-        print("appending notification to log file at: ", self.filepath)
+        print(f"Appending notification to log file ({self.filepath})...")
         with open(self.filepath, 'a+') as file:
             file.write("====================\n")
             now = datetime.now().strftime('%a, %d %b %Y %H:%M:%S')
@@ -22,3 +24,4 @@ class LogFileNotifier:
             file.write(f"{subject}\n")
             file.write(f"{text}\n")
             file.write("====================\n")
+        print("Done!")

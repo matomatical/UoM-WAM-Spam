@@ -15,6 +15,8 @@ from bs4 import BeautifulSoup
 # SCRIPT CONFIGURATION
 #
 
+print("Configuring script...")
+
 # set this to True if you would like the script to repeatedly check the results
 # page, or False if you only want it to run once
 CHECK_REPEATEDLY = True
@@ -83,34 +85,38 @@ should probably check to make sure nothing has gone wrong.
 
 
 # choose a notification method
+# in most cases you can configure the notification method with the
+# required secrets by including them in the corresponding script,
+# or by leaving the scripts alone and typing them in at start-up time
+# (see README for per-method instructions, and remember to keep your
+# secrets safe)
+print("Configuring chosen notification method(s)...")
 
 # option 1: student email notification, via SMTP
-from notify.by_email import SMTPEmailNotifier
+from notify.by_email import SMTPGmailNotifier
 # the script will send email from and to your student email address.
 # if you need to use an app-specific password to get around 2FA on
 # your email account, or other authentication issues, you can set it
 # here as the value of password.
-NOTIFIER = SMTPEmailNotifier(
+NOTIFIER = SMTPGmailNotifier(
             address=UNIMELB_USERNAME + "@student.unimelb.edu.au",
-            password=UNIMELB_PASSWORD,
-            smtp_host="smtp.gmail.com",
-            smtp_port=587)
+            password=UNIMELB_PASSWORD)
 
 # option 2: wechat notification via ServerChan
 # from notify.by_wechat import ServerChanNotifier
-# NOTIFIER = ServerChanNotifier(input("ServerChan API key: "))
+# NOTIFIER = ServerChanNotifier()
 
 # option 3: telegram notification via a telegram bot
-# from notify.by_telegram import TelegramBotNotifier, setup as telegram_setup
-# NOTIFIER = TelegramBotNotifier(*telegram_setup())
+# from notify.by_telegram import TelegramBotNotifier
+# NOTIFIER = TelegramBotNotifier()
 
 # option 4: push notification via pushbullet
 # from notify.by_push import PushbulletNotifier
-# NOTIFIER = PushbulletNotifier(input("Pushbullet Access Token: "))
+# NOTIFIER = PushbulletNotifier()
 
 # option 5: ifttt notification via triggering a webhook
-# from notify.by_ifttt import IFTTTWebhookNotifier, setup as ifttt_setup
-# NOTIFIER = IFTTTWebhookNotifier(*ifttt_setup())
+# from notify.by_ifttt import IFTTTWebhookNotifier
+# NOTIFIER = IFTTTWebhookNotifier()
 
 # option 6: desktop notifications using notify2 python library
 # from notify.by_desktop import DesktopNotifier
@@ -118,7 +124,7 @@ NOTIFIER = SMTPEmailNotifier(
 
 # option 7: notifications via appending to a local filε
 # from notify.by_file import LogFileNotifier
-# NOTIFIER = LogFileNotifier(input("Filepath to log WAM changes to: "))
+# NOTIFIER = LogFileNotifier()
 
 
 

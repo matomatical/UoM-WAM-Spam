@@ -1,14 +1,21 @@
 """
-SMTP-based email notifier
+SMTP-based Gmail notifier
 
 :author: Matthew Farrugia-Roberts
 """
 
+import getpass
 import smtplib
 from email.mime.text import MIMEText
 
-class SMTPEmailNotifier:
-    def __init__(self, address, password, smtp_host, smtp_port):
+
+GMAIL_SMTP_HOST = "smtp.gmail.com"
+GMAIL_SMTP_PORT = 587
+
+
+class SMTPGmailNotifier:
+    def __init__(self, address=None, password=None, smtp_host=GMAIL_SMTP_HOST,
+                    smtp_port=GMAIL_SMTP_PORT):
         """
         :param address: The email address to use (as all three of SMTP login 
                         username, email sender, and email recipient).
@@ -16,8 +23,15 @@ class SMTPEmailNotifier:
         :param smtp_host: Name of the SMTP server.
         :param smtp_port: Port of the SMTP server.
         """
-        self.address = address
-        self.password = password
+        print("Configuring SMTP Gmail Notifier...")
+        if address is not None:
+            self.address = address
+        else:
+            self.address = input("Email address: ")
+        if password is not None:
+            self.password = password
+        else:
+            self.password = getpass.getpass()
         self.host = smtp_host
         self.port = smtp_port
 
