@@ -81,7 +81,6 @@ settings](https://myaccount.google.com/u/2/lesssecureapps?pageId=none) and turn 
 the option to "allow less secure apps".
 You might like to remember to turn it off when you get your results.
 
-
 Also see the `oauth-contrib` branch for work to add an OAuth2.0-based email
 notification method.
 
@@ -209,5 +208,3 @@ with an overly dramatic error message.  Please see these possible errors:
 
 You might have typed your username or password wrong.
 Please check that you got them right, and try again.
-
-

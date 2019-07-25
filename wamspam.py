@@ -6,6 +6,8 @@ update, and then send the student a self-email if anything changed
 """
 import time
 import getpass
+import smtplib
+from email.mime.text import MIMEText
 
 import requests
 from bs4 import BeautifulSoup
@@ -52,6 +54,13 @@ BS4_PARSER = "html.parser"
 # # #
 # NOTIFICATION CONFIGURATION
 #
+
+# the script will send email from and to your student email address.
+# if you need to use an app-specific password to get around 2FA on
+# your email account, or other authentication issues, you can set it
+# here as the value of EMAIL_PASSWORD.
+EMAIL_ADDRESS  = UNIMELB_USERNAME + "@student.unimelb.edu.au"
+EMAIL_PASSWORD = UNIMELB_PASSWORD
 
 # here we specify the format of the email messages (customise to your liking)
 MESSAGE_SUBJECT = "WAM Update Detected"
@@ -188,7 +197,7 @@ def poll_and_notify():
     elif new_wam < old_wam:
         message_template = DECREASE_MESSAGE_TEMPLATE
     else:
-        print("No change to WAM---stop before triggering notifications.")
+        print("No change to WAM---stop before sending an email.")
         return
 
     # compose and send the notification
