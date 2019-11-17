@@ -136,7 +136,7 @@ NOTIFIER.add_notifier(SMTPGmailNotifier(
 # NOTIFIER.add_notifier(DesktopNotifier())
 
 # option 7: notifications via appending to a local filε
-# from notify.by_file import LogFileNotifier
+# from notify.by_logfile import LogFileNotifier
 # NOTIFIER.add_notifier(LogFileNotifier())
 
 
