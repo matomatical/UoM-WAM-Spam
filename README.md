@@ -1,5 +1,7 @@
 # UoM WAM Spam
 
+> Hello! Matt here. Happy exam season. For exciting but untested work bringing you results updates through multiple notification methods, check out the `notify` branch!
+
 The official results release date is usually about two weeks after the end of the exam period. In practice, subject marks become visible a week or two earlier than the official release date, and can be inferred even earlier by detecting a change in calculated WAM (Weighted Average Mark) as soon as the results are in the system (days before the results themselves are made visible on the results page).
 
 This script periodically checks the my.unimelb results page to detect any changes to your WAM, and sends you an email when a change is detected. If you run this script in the background on your computer or on a VPS, you'll be free to enjoy the first few weeks of your holidays without compulsively checking the results page yourself! Or is it just me who does that?
