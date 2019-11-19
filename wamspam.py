@@ -17,16 +17,18 @@ from bs4 import BeautifulSoup
 # SCRIPT CONFIGURATION
 #
 
+print("Configuring script...")
+
 # set this to True if you would like the script to repeatedly check the results
 # page, or False if you only want it to run once
 CHECK_REPEATEDLY = True
 
-# if you set the script to check repeatedly above, you can configure the delay 
+# if you set the script to check repeatedly above, you can configure the delay
 # between WAM checks in minutes here
 DELAY_BETWEEN_CHECKS = 60 # minutes
 
-# leave these lines unchanged to be prompted for your username and password 
-# every time you run the script, or just hard code your credentials here if 
+# leave these lines unchanged to be prompted for your username and password
+# every time you run the script, or just hard code your credentials here if
 # you're lazy (but then be careful not to let anyone else see this file)
 UNIMELB_USERNAME = input("Username: ")
 UNIMELB_PASSWORD = getpass.getpass()
@@ -50,8 +52,8 @@ BS4_PARSER = "html.parser"
 
 
 # # #
-# EMAIL CONFIGURATION
-# 
+# NOTIFICATION CONFIGURATION
+#
 
 # the script will send email from and to your student email address.
 # if you need to use an app-specific password to get around 2FA on
@@ -61,9 +63,9 @@ EMAIL_ADDRESS  = UNIMELB_USERNAME + "@student.unimelb.edu.au"
 EMAIL_PASSWORD = UNIMELB_PASSWORD
 
 # here we specify the format of the email messages (customise to your liking)
-SUBJECT = "WAM Update Detected"
-EMAIL_TEMPLATE = """Hello there!
-{message}
+MESSAGE_SUBJECT = "WAM Update Detected"
+MESSAGE_TEMPLATE = """Hello there!
+{}
 Love,
 WAM Spammer
 """
@@ -90,29 +92,95 @@ every so often---unless I crash! Every now and then you
 should probably check to make sure nothing has gone wrong.
 """
 
-# these are unlikely to change
-UNIMELB_SMTP_HOST = "smtp.gmail.com"
-UNIMELB_SMTP_PORT = 587
+# we'll use a multi-notifier to allow for any number of
+# notification methods (added below)
+from notify.by_multiple import MultiNotifier
+NOTIFIER = MultiNotifier()
+
+# choose one or more notification methods to use when a change is detected.
+
+# in most cases you can configure the notification method with the required
+# secrets by including them in the corresponding script, or by leaving the
+# scripts alone and typing them in at start-up time (see README for per-method
+# instructions, and remember to keep your secrets safe!)
+print("Configuring chosen notification method(s)...")
+
+# option 1: student email notification, via SMTP
+from notify.by_email import SMTPGmailNotifier
+# the script will send email from and to your student email address
+# by default.
+# if you need to use an app-specific password to get around 2FA on
+# your email account, or other authentication issues, you can set it
+# here as the value of password.
+GMAIL_ADDRESS  = UNIMELB_USERNAME + "@student.unimelb.edu.au"
+GMAIL_PASSWORD = UNIMELB_PASSWORD # or app-specific password
+NOTIFIER.add_notifier(SMTPGmailNotifier(
+    address=GMAIL_ADDRESS,
+    password=GMAIL_PASSWORD))
+
+# option 2: wechat notification via ServerChan
+# uncomment below and configure to enable
+# from notify.by_wechat import ServerChanNotifier
+# SERVERCHAN_API_KEY = # put API key here, as a string (see README)
+# NOTIFIER.add_notifier(ServerChanNotifier(
+#    apikey=SERVERCHAN_API_KEY))
+
+# option 3: telegram notification via a telegram bot
+# uncomment below and configure to enable
+# from notify.by_telegram import TelegramBotNotifier
+# TELEGRAM_ACCESS_TOKEN = # put access token string here (see README)
+# TELEGRAM_DESTINATION  = # put destination chat name here (see README)
+# NOTIFIER.add_notifier(TelegramBotNotifier(
+#    token=TELEGRAM_ACCESS_TOKEN,
+#    chat=TELEGRAM_DESTINATION))
+
+# option 4: push notification via pushbullet
+# uncomment below and configure to enable
+# from notify.by_push import PushbulletNotifier
+# PUSHBULLET_ACCESS_TOKEN = # put access token here (string) (see README)
+# NOTIFIER.add_notifier(PushbulletNotifier(
+#    token=PUSHBULLET_ACCESS_TOKEN))
+
+# option 5: ifttt notification via triggering a webhook
+# uncomment below and configure to enable
+# from notify.by_ifttt import IFTTTWebhookNotifier
+# IFTTT_WEBHOOK_KEY = # put webhook key string here (see README)
+# NOTIFIER.add_notifier(IFTTTWebhookNotifier(
+#    key=IFTTT_WEBHOOK_KEY))
+
+# option 6: desktop notifications using notify2 python library
+# uncomment below to enable
+# from notify.by_desktop import DesktopNotifier
+# NOTIFIER.add_notifier(DesktopNotifier())
+
+# option 7: notifications via appending to a local filε
+# uncomment below and configure to enable
+# from notify.by_logfile import LogFileNotifier
+# LOGFILE_FILEPATH = # put filepath string here (see README)
+# NOTIFIER.add_notifier(LogFileNotifier(
+#    filepath=LOGFILE_FILEPATH))
+
 
 
 # let's get to it!
 
 def main():
     """Run the checking script, once or forever, depending on configuration."""
+    # send a test message to make sure the notification configuration is working
+    NOTIFIER.notify(HELLO_SUBJECT, MESSAGE_TEMPLATE.format(HELLO_MESSAGE))
+
     # conduct the first check! don't catch any exceptions here, if the
     # check fails this first time, it's likely to be a configuration problem
     # (e.g. wrong username/password) so we should crash the script to let the
     # user know.
-    poll_and_email()
-    # also send a test message to make sure the email configuration is working
-    email_self(HELLO_SUBJECT, EMAIL_TEMPLATE.format(message=HELLO_MESSAGE))
+    poll_and_notify()
 
     while CHECK_REPEATEDLY:
         print("Sleeping", DELAY_BETWEEN_CHECKS, "minutes before next check.")
         time.sleep(DELAY_BETWEEN_CHECKS * 60) # seconds
         print("Waking up!")
         try:
-            poll_and_email()
+            poll_and_notify()
         except Exception as e:
             # if we get an exception now, it may have been some temporary
             # problem accessing the website, let's just ignore it and try
@@ -121,10 +189,10 @@ def main():
             print(f"{e.__class__.__name__}: {e}")
             print("Hopefully it won't happen again. Continuing.")
 
-def poll_and_email():
+
+def poll_and_notify():
     """
-    Check for an updated WAM, and send an email notification if any change is
-    detected.
+    Check for an updated WAM, and send a notification if any change is detected.
     """
     # check the results page for the updated WAM
     new_wam_text = scrape_wam()
@@ -153,11 +221,10 @@ def poll_and_email():
         print("No change to WAM---stop before sending an email.")
         return
 
-    # compose and send the message
+    # compose and send the notification
     message = message_template.format(before=old_wam, after=new_wam)
-    email_text = EMAIL_TEMPLATE.format(message=message)
-    email_self(SUBJECT, email_text)
-    
+    NOTIFIER.notify(MESSAGE_SUBJECT, MESSAGE_TEMPLATE.format(message))
+
     # update the wam file for next time
     with open(WAM_FILENAME, 'w') as wamfile:
         wamfile.write(f"{new_wam}\n")
@@ -227,37 +294,6 @@ def scrape_wam(username=UNIMELB_USERNAME, password=UNIMELB_PASSWORD):
             wam_text = None
 
     return wam_text
-
-
-def email_self(subject, text, address=EMAIL_ADDRESS, password=EMAIL_PASSWORD):
-    """
-    Send an email from the student to the student (with provided email address
-    and password)
-
-    :param subject: The email subject line
-    :param text: The email body text
-    :param address: The email address to use (as SMTP login username, email 
-                    sender, and email recipient)
-    :param password: The password to use for SMTP server login.
-    """
-    print("Sending an email to self...")
-    print("From/To:", address)
-    print("Subject:", subject)
-    print("Message:", '"""', text, '"""', sep="\n")
-    
-    # make the email object
-    msg = MIMEText(text)
-    msg['To'] = address
-    msg['From'] = f"WAM Spammer <{address}>"
-    msg['Subject'] = subject
-
-    # log into the unimelb student email SMTP server (gmail) to send it
-    s = smtplib.SMTP(UNIMELB_SMTP_HOST, UNIMELB_SMTP_PORT)
-    s.ehlo(); s.starttls()
-    s.login(address, password)
-    s.sendmail(address, [address], msg.as_string())
-    s.quit()
-    print("Sent!")
 
 
 if __name__ == '__main__':
