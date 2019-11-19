@@ -71,14 +71,15 @@ The default notifcation method.
 The script will log in to your university email account and send you a self-
 email notifying you about the WAM change.
 
-This option requires no configuration, but if you see an error (or similar):
+This option requires no additional configuration, but if you see an error (or
+similar):
 `smtplib.SMTPAuthenticationError: (535, b'5.7.8 Username and Password not accepted')`
 then Google must be blocking the script's attempt to log into your SMTP server.
 
 This is because Google thinks the way the script logs into your account does not
-meet their security standards.  One work-around is to go to: [your Google security
-settings](https://myaccount.google.com/u/2/lesssecureapps?pageId=none) and turn on
-the option to "allow less secure apps".
+meet their security standards.  One work-around is to go to: [your Google
+security settings](https://myaccount.google.com/u/2/lesssecureapps?pageId=none)
+and turn on the option to "allow less secure apps".
 You might like to remember to turn it off when you get your results.
 
 Also see the `oauth-contrib` branch for work to add an OAuth2.0-based email
@@ -91,8 +92,9 @@ The script will use the [ServerChan](https://sc.ftqq.com) API to send you a
 [WeChat](https://wechat.com) message.
 
 You'll need to acquire a WeChat account and a ServerChan API key.
-Set up your account and then enter your API key into the script at runtime,
-or hard-code it into `notify/by_wechat.py`.
+Set up your account and then configure the script with your API key
+(you can hard-code it into `wamspam.py`, or add code to read it from a file 
+or environment variable or standard input, for example).
 Remember to keep your secrets safe!
 
 
@@ -110,9 +112,10 @@ You'll then need a bot access token, which will be in the format:
 ```
 
 Set up your Telegram account and note the numerical user, group, or channel ID
-you wish to be contacted through. Then enter your access token and destination
-chat into the script at runtime, or hard-code them into
-`notify/by_telegram.py`.
+you wish to be contacted through (your 'destination').
+Configure the script with your access token and destination (you can hard-code
+them into `wamspam.py`, or add code to read them from a file or environment
+variable or standard input, for example).
 Remember to keep your secrets safe!
 
 
@@ -122,8 +125,9 @@ The script will use the [Pushbullet](https://www.pushbullet.com) API to send
 you a push notification (to whichever devices you have their apps installed).
 
 You'll need to acquire a Pushbullet account and API Access Token for this.
-Set up your account and link your desired devices, then enter your API Access
-Token into the script at runtime, or hard-code them into `notify/by_push.py`.
+Set up your account and link your desired devices, then configure the script
+with your access token (you can hard-code it into `wamspam.py`, or add code to
+read it from a file or environment variable or standard input, for example).
 Remember to keep your secrets safe!
 
 
@@ -139,6 +143,9 @@ You'll need an IFTTT account and a webhook key. You can retrieve a key [here
 Aa0Bb1Cc2Dd3Ee4Ff5Gg6H
 ```
 
+Configure the script with your webhook key (you can hard-code it into
+`wamspam.py`, or add code to read it from a file or environment variable or
+standard input, for example).
 The script will send notification messages with the event `wam-spam`, with
 `value1` set to the subject of the notification and `value2` set to the
 body text. Set up an IFTTT applet to respond to this event, and enter the
@@ -159,13 +166,15 @@ Depending on your platform, you may need to install support for desktop
 notifications. For example, for Arch linux, you'll need [libnotify and a
 notification server](https://wiki.archlinux.org/index.php/Desktop_notifications).
 
+No script configuration is required.
 
 #### Logfile message
 
 The script will log the notification message to a local file.
 
-The only configuration required is to enter the name of the desired file
-into the script at runtime, or hard-code it into `notify/by_logfile.py`.
+The only configuration required is to configure the name of the desired file
+into the script (you can hard-code it into `wamspam.py`, or add code to read
+it from a file or environment variable or standard input, for example).
 
 
 #### Multiple notification methods
@@ -202,7 +211,6 @@ method(s).
 
 The script is not very robust.  If anything goes wrong, it will probably crash
 with an overly dramatic error message.  Please see these possible errors:
-
 
 ##### The script crashes with an error: `InvalidLoginException`.
 

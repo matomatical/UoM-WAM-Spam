@@ -11,9 +11,9 @@ class LogFileNotifier:
     """
     Writes 'notifications' to a local file.
     """
-    def __init__(self) -> None:
+    def __init__(self, filepath: str) -> None:
         print("Configuring Log File Notifier...")
-        self.filepath = input("Filepath (see README):")
+        self.filepath = filepath
 
     def notify(self, subject: str, text: str) -> None:
         print(f"Appending notification to log file ({self.filepath})...")

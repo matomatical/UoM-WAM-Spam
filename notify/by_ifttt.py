@@ -11,15 +11,12 @@ class IFTTTWebhookNotifier:
     """
     Send notification using IFTTT WebHook.
 
-    You can obtain your webhook key at https://ifttt.com/maker_webhooks.
-
     Messages will be sent in "wam-spam" event, with "value1" as the title,
     and "value2" as the body text.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, key: str) -> None:
         print("Configuring IFTTT Webhook Notifier...")
-        key = input("Webhook key (see README): ")
         self.entry_point = f"https://maker.ifttt.com/trigger/wam-spam/with/key/{key}"
 
     def notify(self, subject: str, text: str) -> None:

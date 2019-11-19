@@ -12,10 +12,9 @@ class ServerChanNotifier:
     Send notification to wechat using ServerChan.
     https://sc.ftqq.com
     """
-    def __init__(self) -> None:
+    def __init__(self, apikey: str) -> None:
         print("Configuring Server Chan Notifier...")
-        token = input("API Key (see README): ")
-        self.api = f"https://sc.ftqq.com/{token}.send"
+        self.api = f"https://sc.ftqq.com/{apikey}.send"
 
     def notify(self, subject: str, text: str) -> None:
         print("Sending We Chat message...")

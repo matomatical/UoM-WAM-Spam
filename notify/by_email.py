@@ -14,7 +14,7 @@ GMAIL_SMTP_PORT = 587
 
 
 class SMTPGmailNotifier:
-    def __init__(self, address=None, password=None, smtp_host=GMAIL_SMTP_HOST,
+    def __init__(self, address, password, smtp_host=GMAIL_SMTP_HOST,
                     smtp_port=GMAIL_SMTP_PORT):
         """
         :param address: The email address to use (as all three of SMTP login 
@@ -24,14 +24,8 @@ class SMTPGmailNotifier:
         :param smtp_port: Port of the SMTP server.
         """
         print("Configuring SMTP Gmail Notifier...")
-        if address is not None:
-            self.address = address
-        else:
-            self.address = input("Email address: ")
-        if password is not None:
-            self.password = password
-        else:
-            self.password = getpass.getpass()
+        self.address = address
+        self.password = password
         self.host = smtp_host
         self.port = smtp_port
 

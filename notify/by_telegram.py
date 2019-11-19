@@ -13,11 +13,10 @@ class TelegramBotNotifier:
 
     Telegram bot can be created with @BotFather (https://t.me/botfather).
     """
-    def __init__(self) -> None:
+    def __init__(self, token: str, chat: str) -> None:
         print("Configuring Telegram Bot Notifier...")
-        token = input("Access token (see README): ")
         self.entry_point = f"https://api.telegram.org/bot{token}/sendMessage"
-        self.chat = input("Destination (see README): ")
+        self.chat = chat
 
     def notify(self, subject: str, text: str) -> None:
         print("Sending Telegram Bot notification...")

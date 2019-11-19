@@ -12,9 +12,9 @@ class PushbulletNotifier:
     Send notification using Pushbullet.
     https://www.pushbullet.com
     """
-    def __init__(self) -> None:
+    def __init__(self, token: str) -> None:
         print("Configuring Pushbullet Notifier...")
-        self.token = input("Access Token (see README): ")
+        self.token = token
 
     def notify(self, subject: str, text: str) -> None:
         print("Sending Pushbullet notification...")

@@ -107,37 +107,58 @@ print("Configuring chosen notification method(s)...")
 
 # option 1: student email notification, via SMTP
 from notify.by_email import SMTPGmailNotifier
-# the script will send email from and to your student email address.
+# the script will send email from and to your student email address
+# by default.
 # if you need to use an app-specific password to get around 2FA on
 # your email account, or other authentication issues, you can set it
 # here as the value of password.
+GMAIL_ADDRESS  = UNIMELB_USERNAME + "@student.unimelb.edu.au"
+GMAIL_PASSWORD = UNIMELB_PASSWORD # or app-specific password
 NOTIFIER.add_notifier(SMTPGmailNotifier(
-    address=UNIMELB_USERNAME + "@student.unimelb.edu.au",
-    password=UNIMELB_PASSWORD))
+    address=GMAIL_ADDRESS,
+    password=GMAIL_PASSWORD))
 
 # option 2: wechat notification via ServerChan
+# uncomment below and configure to enable
 # from notify.by_wechat import ServerChanNotifier
-# NOTIFIER.add_notifier(ServerChanNotifier())
+# SERVERCHAN_API_KEY = # put API key here, as a string (see README)
+# NOTIFIER.add_notifier(ServerChanNotifier(
+#    apikey=SERVERCHAN_API_KEY))
 
 # option 3: telegram notification via a telegram bot
+# uncomment below and configure to enable
 # from notify.by_telegram import TelegramBotNotifier
-# NOTIFIER.add_notifier(TelegramBotNotifier())
+# TELEGRAM_ACCESS_TOKEN = # put access token string here (see README)
+# TELEGRAM_DESTINATION  = # put destination chat name here (see README)
+# NOTIFIER.add_notifier(TelegramBotNotifier(
+#    token=TELEGRAM_ACCESS_TOKEN,
+#    chat=TELEGRAM_DESTINATION))
 
 # option 4: push notification via pushbullet
+# uncomment below and configure to enable
 # from notify.by_push import PushbulletNotifier
-# NOTIFIER.add_notifier(PushbulletNotifier())
+# PUSHBULLET_ACCESS_TOKEN = # put access token here (string) (see README)
+# NOTIFIER.add_notifier(PushbulletNotifier(
+#    token=PUSHBULLET_ACCESS_TOKEN))
 
 # option 5: ifttt notification via triggering a webhook
+# uncomment below and configure to enable
 # from notify.by_ifttt import IFTTTWebhookNotifier
-# NOTIFIER.add_notifier(IFTTTWebhookNotifier())
+# IFTTT_WEBHOOK_KEY = # put webhook key string here (see README)
+# NOTIFIER.add_notifier(IFTTTWebhookNotifier(
+#    key=IFTTT_WEBHOOK_KEY))
 
 # option 6: desktop notifications using notify2 python library
+# uncomment below to enable
 # from notify.by_desktop import DesktopNotifier
 # NOTIFIER.add_notifier(DesktopNotifier())
 
 # option 7: notifications via appending to a local filε
+# uncomment below and configure to enable
 # from notify.by_logfile import LogFileNotifier
-# NOTIFIER.add_notifier(LogFileNotifier())
+# LOGFILE_FILEPATH = # put filepath string here (see README)
+# NOTIFIER.add_notifier(LogFileNotifier(
+#    filepath=LOGFILE_FILEPATH))
 
 
 
