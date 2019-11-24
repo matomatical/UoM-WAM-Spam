@@ -44,6 +44,12 @@ DEGREES_TO_WATCH = "all"
 # DEGREES_TO_WATCH = {0}
 # for students with only a single degree, this option is ignored
 
+# for students with a single degree, we can't scrape the degree name from the
+# degree list, so we use a default
+# you can optionally personalise your degree name here (e.g. replace with
+# "Bachelor of Science (Computing and Software Systems)":
+DEFAULT_DEGREE_NAME = "degree"
+
 
 # # #
 # WEB SCRAPING CONFIGURATION
@@ -169,21 +175,36 @@ def poll_and_notify():
             old_results = json.load(resultsfile)
     except:
         # the first run, there probably won't be such a file
-        old_results = {}
+        # imagine a default
+        old_results = {DEFAULT_DEGREE_NAME: {"wam": None, "results": []}}
 
     # compare the results for each degree:
-    for degree, results in new_results.items():
-        if degree not in old_results:
+    degrees = new_results.keys() | old_results.keys()
+    for degree in degrees:
+        if degree not in new_results:
+            # maybe by error, the degree seems to have been removed
+            # that doesn't mean we should forget it! forward old results
+            # so that we don't remove them from the file
+            print("Missing results for", degree)
+            new_results[degree] = old_results[degree]
+        elif degree not in old_results:
+            # still unlikely during results period; but a new degree has
+            # appeared! send the initialisation message
             print("Found new results for", degree)
+            results = new_results[degree]
             NOTIFIER.notify(*messages.initial_message(degree, results))
-        elif old_results[degree] != results:
-            print("Found updated results for", degree)
-            before = old_results[degree]
-            after  = results
-            NOTIFIER.notify(*messages.update_message(degree, before, after))
         else:
-            # no change to results for this degree. ignore it!
-            print("No change for", degree)
+            # more likely, we have seen the degree before, but the results may
+            # have changed:
+            old = old_results[degree]
+            new = new_results[degree]
+            if old != new:
+                # compute difference, and send notification
+                print("Found updated results for", degree)
+                NOTIFIER.notify(*messages.update_message(degree, old, new))
+            else:
+                # no change to results for this degree. ignore it!
+                print("No change for", degree)
 
     # update the results file for next time
     with open(RESULTS_FILENAME, 'w') as resultsfile:
@@ -254,8 +275,9 @@ def scrape_results(username, password):
                 transcript[degree_name] = parse_page(soup)
         else:
             print("Single degree detected. Parsing results page directly...")
-            # now `soup` should be the parsed results page for the only degree
-            transcript["Your results"] = parse_page(soup) # unknown degree name
+            # in this case `soup` is already the parsed results page for the
+            # only degree
+            transcript[DEFAULT_DEGREE_NAME] = parse_page(soup)
             
         return transcript
 

@@ -128,8 +128,8 @@ def results_diff(before, after):
     new_set = set(new_subjects)
     # subjects changed:
     for subject in old_set & new_set:
-        old_result = new_subjects[subject]
-        new_result = old_subjects[subject]
+        old_result = old_subjects[subject]
+        new_result = new_subjects[subject]
         if old_result != new_result:
             result = new_result.copy()
             result["pre"] = ""
