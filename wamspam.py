@@ -1,13 +1,12 @@
 """
-log in to my.unimelb results page using a student account, check for a WAM
-update, and then send the student a self-email if anything changed
+log in to my.unimelb results page using a student account, check for a results
+update, and then send the student a notification if anything changed
 
 :author: Matthew Farrugia-Roberts
 """
+import json
 import time
 import getpass
-import smtplib
-from email.mime.text import MIMEText
 
 import requests
 from bs4 import BeautifulSoup
@@ -33,18 +32,13 @@ DELAY_BETWEEN_CHECKS = 60 # minutes
 UNIMELB_USERNAME = input("Username: ")
 UNIMELB_PASSWORD = getpass.getpass()
 
-# your WAM will be stored in this file in between checks
-WAM_FILENAME = "wam.txt"
+# your results will be stored in this file in between checks
+RESULTS_FILENAME = "results.txt"
 
 
 # # #
 # WEB SCRAPING CONFIGURATION
 #
-
-# if you have multiple degrees, set this to the id of the degree with the WAM
-# you want the script to watch (0, 1, 2, ... based on order from results page).
-# if you only have a single degree, you can ignore this one.
-DEGREE_INDEX = 0
 
 # select the HTML parser for BeautifulSoup to use. in most cases, you won't
 # have to touch this.
@@ -55,35 +49,49 @@ BS4_PARSER = "html.parser"
 # NOTIFICATION CONFIGURATION
 #
 
-# here we specify the format of the email messages (customise to your liking)
-MESSAGE_SUBJECT = "WAM Update Detected"
-MESSAGE_TEMPLATE = """Hello there!
-{}
-Love,
-WAM Spammer
-"""
-INCREASE_MESSAGE_TEMPLATE = """
-I noticed that your WAM increased from {before} to {after}.
-Congratulations! The hard work paid off (and I'm sure there
-was a little luck involved, too).
-"""
-DECREASE_MESSAGE_TEMPLATE = """
-I noticed that your WAM changed from {before} to {after}.
-That's okay, I know you tried your best, and that's all
-anyone can ask for.
-"""
-FIRSTMSG_MESSAGE_TEMPLATE = """
-I noticed that your WAM is {after}. I hope it makes you
-happy. Anyway, I'll keep an eye on it for you from now on,
-and I'll let you know if it changes.
-"""
+# here we specify the format of the messages (customise to your liking)
 HELLO_SUBJECT = "Hello! I'm WAM Spammer"
-HELLO_MESSAGE = """
-I'm WAM Spammer. This is just a test message to tell you
-that I'm running. I'll look out for a change to your WAM
-every so often---unless I crash! Every now and then you
-should probably check to make sure nothing has gone wrong.
-"""
+HELLO_MESSAGE = (
+    "Hello there!\n"
+    "\n"
+    "I'm WAM Spammer. This is just a message to let you know I'm running and "
+    "to test our notification configuration. I'll check for changes to your "
+    "results once every {delay} minutes---unless I crash! Every now and then, "
+    "you should probably check on me to make sure nothing has gone wrong.\n"
+    "\n"
+    "Love,\n"
+    "WAM Spammer"
+)
+INITIAL_SUBJECT = "Saving initial results - {degree}"
+INITIAL_MESSAGE = (
+    "Hey there!\n"
+    "\n"
+    "I checked your {degree} results page for the first time, and found these "
+    "results:\n"
+    "\n"
+    "{results}"
+    "\n"
+    "I'll remember them and let you know if I notice any changes.\n"
+    "\n"
+    "Love,\n"
+    "WAM Spammer"
+)
+UPDATE_SUBJECT = "Results update detected - {degree}"
+UPDATE_MESSAGE = (
+    "Hello there!\n"
+    "\n"
+    "I noticed that your {degree} results page was updated recently. Here's "
+    "a diff of the update (- indicates a removed line, + indicates an added "
+    "line).\n"
+    "\n"
+    "{}"
+    "{results_change}"
+    "\n"
+    "{mood}"
+    "\n"
+    "Love,\n"
+    "WAM Spammer"
+)
 
 # we'll use a multi-notifier to allow for any number of
 # notification methods (added below)
@@ -160,12 +168,13 @@ NOTIFIER.add_notifier(SMTPGmailNotifier(
 def main():
     """Run the checking script, once or forever, depending on configuration."""
     # send a test message to make sure the notification configuration is working
-    NOTIFIER.notify(HELLO_SUBJECT, MESSAGE_TEMPLATE.format(HELLO_MESSAGE))
+    hello = HELLO_SUBJECT, HELLO_MESSAGE.format(delay=DELAY_BETWEEN_CHECKS)
+    NOTIFIER.notify(*hello)
 
-    # conduct the first check! don't catch any exceptions here, if the
-    # check fails this first time, it's likely to be a configuration problem
-    # (e.g. wrong username/password) so we should crash the script to let the
-    # user know.
+    # conduct the first check! don't catch any exceptions here, if the check
+    # fails this first time, it's likely to be a configuration problem (e.g.
+    # wrong username/password) so we should crash the script to let the user
+    # know.
     poll_and_notify()
 
     while CHECK_REPEATEDLY:
@@ -185,49 +194,47 @@ def main():
 
 def poll_and_notify():
     """
-    Check for an updated WAM, and send a notification if any change is detected.
+    Check for updated results, and send a notification if a change is detected.
     """
-    # check the results page for the updated WAM
-    new_wam_text = scrape_wam()
-    if new_wam_text is None:
-        # no WAM found
-        return
-    new_wam = float(new_wam_text)
+    # check the results page for the latest results
+    new_results = scrape_results(UNIMELB_USERNAME, UNIMELB_PASSWORD)
 
-    # load the previous WAM to compare against
+    # load the previous results from file
     try:
-        with open(WAM_FILENAME) as wamfile:
-            old_wam_text = wamfile.read()
-        old_wam = float(old_wam_text)
+        with open(RESULTS_FILENAME) as resultsfile:
+            old_results = json.load(resultsfile)
     except:
-        # the first time we run the script, there probably wont be a wam file
-        old_wam = None
+        # the first run, there probably won't be such a file
+        old_results = {}
 
-    # detect the type of WAM change so that we can choose which message to send
-    if old_wam is None:
-        message_template = FIRSTMSG_MESSAGE_TEMPLATE
-    elif new_wam > old_wam:
-        message_template = INCREASE_MESSAGE_TEMPLATE
-    elif new_wam < old_wam:
-        message_template = DECREASE_MESSAGE_TEMPLATE
-    else:
-        print("No change to WAM---stop before sending an email.")
-        return
+    # compare the results for each degree:
+    for degree, results in new_results.items():
+        if degree not in old_results:
+            summary = f"{results}\n" # TODO: Prettify for text format
+            NOTIFIER.notify(
+                INITIAL_SUBJECT.format(degree=degree),
+                INITIAL_MESSAGE.format(degree=degree, results=summary)
+            )
+        elif old_results[degree] != results:
+            summary = f"{results}\n" # TODO: compute Diff and prettify for text
+            NOTIFIER.notify(
+                UPDATE_SUBJECT.format(degree=degree),
+                UPDATE_MESSAGE.format(degree=degree, results_diff=summary)
+            )
+        else:
+            # no change to results for this degree. ignore it!
+            pass
 
-    # compose and send the notification
-    message = message_template.format(before=old_wam, after=new_wam)
-    NOTIFIER.notify(MESSAGE_SUBJECT, MESSAGE_TEMPLATE.format(message))
-
-    # update the wam file for next time
-    with open(WAM_FILENAME, 'w') as wamfile:
-        wamfile.write(f"{new_wam}\n")
+    # update the results file for next time
+    with open(RESULTS_FILENAME, 'w') as resultsfile:
+        json.dump(new_results, resultsfile, indent=2)
 
 
 class InvalidLoginException(Exception):
     """Represent a login form validation error"""
 
 
-def scrape_wam(username=UNIMELB_USERNAME, password=UNIMELB_PASSWORD):
+def scrape_results(username, password):
     with requests.Session() as session:
         # step 1. load a login page to initialse session
         print("Logging in to the results page")
@@ -255,38 +262,71 @@ def scrape_wam(username=UNIMELB_USERNAME, password=UNIMELB_PASSWORD):
                 " Please check your details and try again.")
 
         # now `soup` should be the parsed results page or multi-degree page...
+        # step 3. either way, we are ready to start building the transcript!
+        transcript = {}
 
-        # step 3. if necessary, navigate to a specific degree page (for
-        # multi-degree students)
         title = soup.find(id="ctl00_h1PageTitle")
         if title.text == "Results > Choose a Study Plan":
-            print("Multiple degrees detected.")
-            degree_grid = soup.find("table", id="ctl00_Content_grdResultPlans")
-            cell = degree_grid.find_all("tr")[DEGREE_INDEX+1].find_all("td")[2]
-            print(f"Loading results for degree {DEGREE_INDEX} - {cell.text}")
+            print("Multiple degrees detected. Walking results pages...")
+            grid = soup.find("table", id="ctl00_Content_grdResultPlans")
+            rows = grid.find_all("tr")[1:] # skip header
+            cells = [row.find_all("td")[2].text for row in rows]
+
             # get the form's hidden field values into the POST data
             hidden_fields = soup.find_all('input', type='hidden')
             degree_form = {tag['name']: tag['value'] for tag in hidden_fields}
-            # now simulate pressing the required degree button
-            degree_form['__EVENTTARGET'] = "ctl00$Content$grdResultPlans"
-            degree_form['__EVENTARGUMENT'] = f"ViewResults${DEGREE_INDEX}"
-            # post the form, to take us to the results page proper
-            response = session.post("https://prod.ss.unimelb.edu.au/student/SM/"
-                "ResultsDtls10.aspx?f=$S1.EST.RSLTDTLS.WEB", data=degree_form)
-            soup = BeautifulSoup(response.content, BS4_PARSER)
 
-        # now `soup` should be the parsed results page for the chosen degree...
-
-        # step 4. extract the actual WAM text from the results page, as required
-        print("Extracting WAM")
-        wam_para = soup.find(class_='UMWAMText')
-        if wam_para is not None:
-            wam_text = wam_para.find('b').text
+            for degree_index, degree_name in enumerate(cells):
+                print(f"Loading results for {degree_name}")
+                # now simulate pressing the required degree button
+                degree_form['__EVENTTARGET'] = "ctl00$Content$grdResultPlans"
+                degree_form['__EVENTARGUMENT'] = f"ViewResults${degree_index}"
+                # post the form, to take us to the results page proper
+                response = session.post("https://prod.ss.unimelb.edu.au/"
+                    "student/SM/ResultsDtls10.aspx?f=$S1.EST.RSLTDTLS.WEB",
+                    data=degree_form)
+                soup = BeautifulSoup(response.content, BS4_PARSER)
+                # now `soup` should be the parsed results page for this degree
+                transcript[degree_name] = parse_page(soup)
         else:
-            print("Couldn't find WAM (no WAM yet?)")
-            wam_text = None
+            print("Single degree detected. Parsing results page directly...")
+            # now `soup` should be the parsed results page for the only degree
+            transcript["Your results"] = parse_page(soup) # unknown degree name
+            
+        return transcript
 
-    return wam_text
+def parse_page(soup):
+    # step 4. extract the results data from the results page, as required
+    print("Extracting WAM")
+    wam_para = soup.find(class_='UMWAMText')
+    if wam_para is not None:
+        wam_text = wam_para.find('b').text
+    else:
+        print("Couldn't find WAM (no WAM yet?)")
+        wam_text = "(none yet)"
+
+    print("Extracting subject results")
+    results = []
+    results_table = soup.find("table", id='ctl00_Content_grdResultDetails')
+    if results_table is None:
+        print("Couldn't find results (no results yet?)")
+    else:
+        rows = results_table.find_all("tr")[1:] # skip header
+        for row in rows:
+            cells = [cell.text.strip() for cell in row.find_all("td")]
+            # cells is a list of strings containing this result's details e.g.:
+            # ['2019', 'Semester 1', 'COMP90045', 'PLI', '2', '99', 'H1', '12.500']
+            # extract the relevant details:               (^ btw this is 'version')
+            result = {
+                "subject": f"{cells[2]} {cells[3]}",
+                "date":    f"{cells[0]}, {cells[1]}",
+                "mark":    cells[5],
+                "grade":   cells[6],
+                "credits": cells[8]
+            }
+            results.append(result)
+
+    return {"wam": wam_text, "results": results}
 
 
 if __name__ == '__main__':
