@@ -11,6 +11,7 @@ import getpass
 import requests
 from bs4 import BeautifulSoup
 
+import messages
 
 # # #
 # SCRIPT CONFIGURATION
@@ -49,50 +50,6 @@ BS4_PARSER = "html.parser"
 # NOTIFICATION CONFIGURATION
 #
 
-# here we specify the format of the messages (customise to your liking)
-HELLO_SUBJECT = "Hello! I'm WAM Spammer"
-HELLO_MESSAGE = (
-    "Hello there!\n"
-    "\n"
-    "I'm WAM Spammer. This is just a message to let you know I'm running and "
-    "to test our notification configuration. I'll check for changes to your "
-    "results once every {delay} minutes---unless I crash! Every now and then, "
-    "you should probably check on me to make sure nothing has gone wrong.\n"
-    "\n"
-    "Love,\n"
-    "WAM Spammer"
-)
-INITIAL_SUBJECT = "Saving initial results - {degree}"
-INITIAL_MESSAGE = (
-    "Hey there!\n"
-    "\n"
-    "I checked your {degree} results page for the first time, and found these "
-    "results:\n"
-    "\n"
-    "{results}"
-    "\n"
-    "I'll remember them and let you know if I notice any changes.\n"
-    "\n"
-    "Love,\n"
-    "WAM Spammer"
-)
-UPDATE_SUBJECT = "Results update detected - {degree}"
-UPDATE_MESSAGE = (
-    "Hello there!\n"
-    "\n"
-    "I noticed that your {degree} results page was updated recently. Here's "
-    "a diff of the update (- indicates a removed line, + indicates an added "
-    "line).\n"
-    "\n"
-    "{}"
-    "{results_change}"
-    "\n"
-    "{mood}"
-    "\n"
-    "Love,\n"
-    "WAM Spammer"
-)
-
 # we'll use a multi-notifier to allow for any number of
 # notification methods (added below)
 from notify.by_multiple import MultiNotifier
@@ -117,7 +74,7 @@ GMAIL_ADDRESS  = UNIMELB_USERNAME + "@student.unimelb.edu.au"
 GMAIL_PASSWORD = UNIMELB_PASSWORD # or app-specific password
 NOTIFIER.add_notifier(SMTPGmailNotifier(
     address=GMAIL_ADDRESS,
-    password=GMAIL_PASSWORD))
+    password=GMAIL_PASSWORD)) 
 
 # option 2: wechat notification via ServerChan
 # uncomment below and configure to enable
@@ -167,9 +124,8 @@ NOTIFIER.add_notifier(SMTPGmailNotifier(
 
 def main():
     """Run the checking script, once or forever, depending on configuration."""
-    # send a test message to make sure the notification configuration is working
-    hello = HELLO_SUBJECT, HELLO_MESSAGE.format(delay=DELAY_BETWEEN_CHECKS)
-    NOTIFIER.notify(*hello)
+    # send a test message to make sure the notification configuration works
+    NOTIFIER.notify(*messages.hello_message(delay=DELAY_BETWEEN_CHECKS))
 
     # conduct the first check! don't catch any exceptions here, if the check
     # fails this first time, it's likely to be a configuration problem (e.g.
@@ -210,17 +166,11 @@ def poll_and_notify():
     # compare the results for each degree:
     for degree, results in new_results.items():
         if degree not in old_results:
-            summary = f"{results}\n" # TODO: Prettify for text format
-            NOTIFIER.notify(
-                INITIAL_SUBJECT.format(degree=degree),
-                INITIAL_MESSAGE.format(degree=degree, results=summary)
-            )
+            NOTIFIER.notify(*messages.initial_message(degree, results))
         elif old_results[degree] != results:
-            summary = f"{results}\n" # TODO: compute Diff and prettify for text
-            NOTIFIER.notify(
-                UPDATE_SUBJECT.format(degree=degree),
-                UPDATE_MESSAGE.format(degree=degree, results_diff=summary)
-            )
+            before = old_results[degree]
+            after  = results
+            NOTIFIER.notify(*messages.update_message(degree, before, after))
         else:
             # no change to results for this degree. ignore it!
             pass
@@ -303,7 +253,7 @@ def parse_page(soup):
         wam_text = wam_para.find('b').text
     else:
         print("Couldn't find WAM (no WAM yet?)")
-        wam_text = "(none yet)"
+        wam_text = None
 
     print("Extracting subject results")
     results = []
