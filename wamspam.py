@@ -2,7 +2,7 @@
 log in to my.unimelb results page using a student account, check for a WAM
 update, and then send the student a self-email if anything changed
 
-:author: Matthew Farrugia-Roberts
+:author: Matthew Farrugia-Roberts and contributors
 """
 import time
 import getpass
