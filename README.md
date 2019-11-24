@@ -8,10 +8,11 @@ Average Mark) as soon as the results are in the system (days before the
 results themselves are made visible on the results page).
 
 This script periodically checks the my.unimelb results page to detect
-any changes to your WAM, and sends you a notification when a change is
-detected. If you run this script in the background on your computer or
-on a VPS, you'll be free to enjoy the first few weeks of your holidays
-without compulsively checking the results page yourself!
+any changes to your WAM and listed results, and sends you a notification
+when a change is detected.
+If you run this script in the background on your computer or on a VPS,
+you'll be free to enjoy the first few weeks of your holidays without
+compulsively checking the results page yourself!
 Or is it just me who does that?
 
 Made with :purple_heart: by Matt, with contributions from CaviarChen,
@@ -42,12 +43,6 @@ While the script has sensible default settings, it's also easily configurable.
 You can modify the constants atop `wamspam.py` to easily change the behaviour.
 Some important configuration options are:
 
-* `DEGREE_INDEX`: **This one's important!** If you have multiple degrees,
-then you need to tell the script which degree's WAM you want it to monitor.
-Just specify a (zero-based) index into the list of degrees on your results
-page (0 for the top degree in the list, 1 for the second, and so on).
-If you only have a single degree, you can ignore this value.
-
 * `CHECK_REPEATEDLY`: By default, the script will repeatedly check your WAM
 until you kill it.
 If you want the script to check your WAM only once, set this to `False`.
@@ -55,7 +50,15 @@ If you want the script to check your WAM only once, set this to `False`.
 * `DELAY_BETWEEN_CHECKS`: You can configure how often the script logs in to
 check for results.
 I had mine set to check every 5 minutes (roughly the frequency at which I
-would be checking if it wasn't for this script). 
+would be checking if it wasn't for this script). But that seemed excessive...
+so I set the default to 60 minutes.
+
+* `DEGREES_TO_WATCH`: Unlike in a previous version, the script will watch all
+degrees listed on your results page by default (`DEGREES_TO_WATCH = "all"`).
+If you'd prefer it not to check them all for some reason, change this to a set
+of degree indices to check (e.g. `DEGREES_TO_WATCH = {0}` to watch only the
+first degree in the list). For students with only one degree, this option is
+ignored.
 
 There are some other configuration options, all documented in the script itself.
 
@@ -69,7 +72,7 @@ its own configuration, as explained below:
 The default notifcation method.
 
 The script will log in to your university email account and send you a self-
-email notifying you about the WAM change.
+email notifying you about the WAM/results change.
 
 This option requires no additional configuration, but if you see an error (or
 similar):
@@ -197,12 +200,12 @@ it with `python3 wamspam.py`.
 
 The script will ask you for your unimelb username and password. It uses these
 to log into the results page on your behalf every however-many minutes you
-configured, looking for your WAM. It stores the previous WAM in a text file
-between checks, for comparison.
+configured, looking for updated results. It stores the previous results in a
+JSON-formatted text file between checks, for comparison.
 
-The first time the script finds your WAM, or whenever it sees your WAM change,
-the script will also send you a notification using your configured notification
-method(s).
+The first time the script finds your results, or whenever it sees your results
+data change, the script will also send you a notification using your configured
+notification method(s).
 
 > Note: Don't forget to stop the script after the final results release date!
 
