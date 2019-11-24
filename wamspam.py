@@ -36,6 +36,14 @@ UNIMELB_PASSWORD = getpass.getpass()
 # your results will be stored in this file in between checks
 RESULTS_FILENAME = "results.txt"
 
+# by default, the script will watch all of your degrees. you can alter this
+# setting here by providing a set of degree indexes (based on the order from
+# the results page, starting with 0) or "all" for all degrees:
+DEGREES_TO_WATCH = "all"
+# for example, to watch only your first degree:
+# DEGREES_TO_WATCH = {0}
+# for students with only a single degree, this option is ignored
+
 
 # # #
 # WEB SCRAPING CONFIGURATION
@@ -166,14 +174,16 @@ def poll_and_notify():
     # compare the results for each degree:
     for degree, results in new_results.items():
         if degree not in old_results:
+            print("Found new results for", degree)
             NOTIFIER.notify(*messages.initial_message(degree, results))
         elif old_results[degree] != results:
+            print("Found updated results for", degree)
             before = old_results[degree]
             after  = results
             NOTIFIER.notify(*messages.update_message(degree, before, after))
         else:
             # no change to results for this degree. ignore it!
-            pass
+            print("No change for", degree)
 
     # update the results file for next time
     with open(RESULTS_FILENAME, 'w') as resultsfile:
@@ -227,7 +237,11 @@ def scrape_results(username, password):
             degree_form = {tag['name']: tag['value'] for tag in hidden_fields}
 
             for degree_index, degree_name in enumerate(cells):
-                print(f"Loading results for {degree_name}")
+                if DEGREES_TO_WATCH != "all":
+                    if degree_index not in DEGREES_TO_WATCH:
+                        print(f"Skipping degree {degree_index}: {degree_name}")
+                        continue
+                print(f"Loading results for {degree_index}: {degree_name}")
                 # now simulate pressing the required degree button
                 degree_form['__EVENTTARGET'] = "ctl00$Content$grdResultPlans"
                 degree_form['__EVENTARGUMENT'] = f"ViewResults${degree_index}"

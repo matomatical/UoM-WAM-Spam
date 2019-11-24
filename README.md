@@ -53,6 +53,13 @@ I had mine set to check every 5 minutes (roughly the frequency at which I
 would be checking if it wasn't for this script). But that seemed excessive...
 so I set the default to 60 minutes.
 
+* `DEGREES_TO_WATCH`: Unlike in a previous version, the script will watch all
+degrees listed on your results page by default (`DEGREES_TO_WATCH = "all"`).
+If you'd prefer it not to check them all for some reason, change this to a set
+of degree indices to check (e.g. `DEGREES_TO_WATCH = {0}` to watch only the
+first degree in the list). For students with only one degree, this option is
+ignored.
+
 There are some other configuration options, all documented in the script itself.
 
 ### Notifcation methods
@@ -199,11 +206,6 @@ JSON-formatted text file between checks, for comparison.
 The first time the script finds your results, or whenever it sees your results
 data change, the script will also send you a notification using your configured
 notification method(s).
-
-> Note: Unlike in a previous version, there is no need to configure the script
-> to check the results for a particular degree. It will watch all degrees by
-> default! If you'd prefer it not to check them all for some reason, you can
-> alter the script.
 
 > Note: Don't forget to stop the script after the final results release date!
 
