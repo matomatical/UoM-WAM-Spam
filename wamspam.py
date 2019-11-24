@@ -125,7 +125,7 @@ NOTIFIER.add_notifier(SMTPGmailNotifier(
 # from notify.by_desktop import DesktopNotifier
 # NOTIFIER.add_notifier(DesktopNotifier())
 
-# option 7: notifications via appending to a local filε
+# option 7: notifications via appending to a local file
 # uncomment below and configure to enable
 # from notify.by_logfile import LogFileNotifier
 # LOGFILE_FILEPATH = # put filepath string here (see README)
