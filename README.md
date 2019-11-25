@@ -69,22 +69,18 @@ its own configuration, as explained below:
 
 #### Student email (default)
 
-The default notifcation method.
-
-The script will log in to your university email account and send you a self-
-email notifying you about the WAM/results change.
+The default notifcation method. The script will log in to your university email
+account and send you a self-email notifying you about the WAM/results change.
 
 This option requires no additional configuration, but if you see an error (or
 similar):
 `smtplib.SMTPAuthenticationError: (535, b'5.7.8 Username and Password not accepted')`
 then Google must be blocking the script's attempt to log into your SMTP server.
-
 This is because Google thinks the way the script logs into your account does not
 meet their security standards.  One work-around is to go to: [your Google
 security settings](https://myaccount.google.com/u/2/lesssecureapps?pageId=none)
 and turn on the option to "allow less secure apps".
 You might like to remember to turn it off when you get your results.
-
 Also see the `oauth-contrib` branch for work to add an OAuth2.0-based email
 notification method.
 
