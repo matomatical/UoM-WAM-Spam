@@ -99,18 +99,23 @@ This notification method requires two additional third-party Python packages:
 * [Google API Python Client](https://github.com/googleapis/google-api-python-client) 
 * [Google OAuth](https://github.com/googleapis/google-auth-library-python-oauthlib)
 
-(Install with e.g. `pip3 install google-api-python-client google-auth-oauthlib`).
+Install with e.g. `pip3 install google-api-python-client google-auth-oauthlib`.
 
-You must also obtain an OAuth 2.0 Client ID from the
-[Google API Console](https://console.developers.google.com) for the script to
-be able to send emails.
-Save this in the file specified by `CLIENT_ID_PATH` in the `APIMailer` class of
-`mailer.py`.
+Then, follow these steps to configure the notification method:
 
-The first time you run the script, you will be asked to authenticate to grant
-the script permission to send email on your behalf.
-
-TODO: Outline steps to get this happening on a VPS.
+1. Obtain an OAuth 2.0 Client ID from the [Google API Console](https://console.developers.google.com)
+   (Credentials > Create credentials > Create OAuth client ID > Other).
+2. Download the client ID JSON file and move it to the same directory as the
+   script, in a file named `gmail-credentials.json` (this path is configurable
+   in `notify/by_email_oauth.py`). This file is sensitive---remember to keep
+   your secrets safe!
+3. Run the script. The first time, you'll need to authenticate in a browser to
+   generate an authentication token. This will then be saved locally (in a file
+   named `gmail-token.pickle`, configurable in `notify/by_email_oauth.py`) so
+   that you won't have to do this step every time.
+4. If you want to run the script on a headless VPS etc. without a browser,
+   you'll need to perform step 3 on a machine with a browser and then copy
+   across the `gmail-token.pickle` file to the headless environment.
 
 
 #### WeChat message

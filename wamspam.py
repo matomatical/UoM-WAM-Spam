@@ -93,7 +93,6 @@ NOTIFIER.add_notifier(SMTPGmailNotifier(
 # option 1: student email notification, via Gmail's API + OAuth
 # from notify.by_email_oauth import GmailAPINotifier
 # GMAIL_ADDRESS = UNIMELB_USERNAME + "@student.unimelb.edu.au"
-# # TODO: Add other configuration e.g oauth token
 # NOTIFIER.add_notifier(GmailAPINotifier(
 #     address=GMAIL_ADDRESS))
 

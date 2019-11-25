@@ -15,30 +15,29 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
+CLIENT_ID_PATH = 'gmail-credentials.json'
+ACCESS_TOKEN_PATH = 'gmail-token.pickle'
+SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
 class GmailAPINotifier:
     """Class to send emails using the Gmail API and OAuth 2.0 Protocol.
 
     To use this class, you must obtain an OAuth 2.0 Client ID from the
-    Google API Console (https://console.developers.google.com).
+    Google API Console (https://console.developers.google.com). See README
+    for detailed instructions.
     """
 
-    CLIENT_ID_PATH = 'credentials.json'
-    ACCESS_TOKEN_PATH = 'token.pickle'
-
-    SCOPES = ['https://www.googleapis.com/auth/gmail.send']
-
-    def __init__(self, address):
+    def __init__(self, address, client_id):
         """
-        Initialise a Mailer object. Prompt the user to authenticate and
-        provide mailing permissions if required.
+        Initialise a GMail notifier object. Prompt the user to authenticate
+        and provide mailing permissions if required.
         """
         self.address = address
         self.creds = None
         # if there's an access token from previous authentication, load it
-        if os.path.exists(self.ACCESS_TOKEN_PATH):
-            with open(self.ACCESS_TOKEN_PATH, 'rb') as token:
-                self.creds = pickle.load(token)
+        if os.path.exists(ACCESS_TOKEN_PATH):
+            with open(ACCESS_TOKEN_PATH, 'rb') as tokenfile:
+                self.creds = pickle.load(tokenfile)
 
         # if the credentials are invalid or non-existent, prompt to authenticate
         if not self.creds or not self.creds.valid:
@@ -46,11 +45,11 @@ class GmailAPINotifier:
                 self.creds.refresh(Request())
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(
-                    self.CLIENT_ID_PATH, self.SCOPES)
+                    CLIENT_ID_PATH, SCOPES)
                 self.creds = flow.run_local_server()
             # save the credentials for the next run
-            with open(self.ACCESS_TOKEN_PATH, 'wb') as token:
-                pickle.dump(self.creds, token)
+            with open(ACCESS_TOKEN_PATH, 'wb') as tokenfile:
+                pickle.dump(self.creds, tokenfile)
 
         self.service = build('gmail', 'v1', credentials=self.creds)
 
