@@ -183,16 +183,24 @@ def poll_and_notify():
     for degree in degrees:
         if degree not in new_results:
             # maybe by error, the degree seems to have been removed
-            # that doesn't mean we should forget it! forward old results
-            # so that we don't remove them from the file
+            # this is more likely to have been a scraper error than an actual
+            # change, so we'll ignore it, and forward the old results
             print("Missing results for", degree)
-            new_results[degree] = old_results[degree]
+            new_results[degree] = old_results[degree] 
         elif degree not in old_results:
             # still unlikely during results period; but a new degree has
             # appeared! send the initialisation message
             print("Found new results for", degree)
             results = new_results[degree]
             NOTIFIER.notify(*messages.initial_message(degree, results))
+        elif new_results[degree] == {"wam": None, "results": []}:
+            # maybe by error, the degree seems to have had its data removed
+            # this is more likely to have been a scraper error than an actual
+            # change, so we'll ignore it, and forward the old results
+            print("Missing results for", degree)
+            new_results[degree] = old_results[degree]
+            # note: in the case where there were just no results yet, this
+            # will behave correctly by not notifying the user
         else:
             # more likely, we have seen the degree before, but the results may
             # have changed:
