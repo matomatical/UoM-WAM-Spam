@@ -86,18 +86,15 @@ The following notification method is a more secure workaround, with a few more
 configuration steps.
 
 
-#### Student email (iGmail with OAuth authentication)
+#### Student email (Gmail with OAuth authentication)
 
 The script will log in to your university email account using Gmail's OAuth 2.0
 API and send you a self-email notification about the results change.
 
 This notification method requires two additional third-party Python packages:
-
-* [Google API Python Client](https://github.com/googleapis/google-api-python-client) 
-* [Google OAuth](https://github.com/googleapis/google-auth-library-python-oauthlib)
-
+[Google API Python Client](https://github.com/googleapis/google-api-python-client) 
+and [Google OAuth](https://github.com/googleapis/google-auth-library-python-oauthlib).
 Install with e.g. `pip3 install google-api-python-client google-auth-oauthlib`.
-
 Then, follow these steps to configure the notification method:
 
 1. Obtain an OAuth 2.0 Client ID from the [Google API Console](https://console.developers.google.com)
