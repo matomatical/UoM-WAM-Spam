@@ -27,7 +27,7 @@ class GmailAPINotifier:
     for detailed instructions.
     """
 
-    def __init__(self, address, client_id):
+    def __init__(self, address):
         """
         Initialise a GMail notifier object. Prompt the user to authenticate
         and provide mailing permissions if required.
