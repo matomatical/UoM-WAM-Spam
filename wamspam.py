@@ -77,7 +77,7 @@ NOTIFIER = MultiNotifier()
 # instructions, and remember to keep your secrets safe!)
 print("Configuring chosen notification method(s)...")
 
-# option 1: student email notification, via SMTP
+# option 0: student email notification, via SMTP
 from notify.by_email import SMTPGmailNotifier
 # the script will send email from and to your student email address
 # by default.
@@ -89,6 +89,12 @@ GMAIL_PASSWORD = UNIMELB_PASSWORD # or app-specific password
 NOTIFIER.add_notifier(SMTPGmailNotifier(
     address=GMAIL_ADDRESS,
     password=GMAIL_PASSWORD)) 
+
+# option 1: student email notification, via Gmail's API + OAuth
+# from notify.by_email_oauth import GmailAPINotifier
+# GMAIL_ADDRESS = UNIMELB_USERNAME + "@student.unimelb.edu.au"
+# NOTIFIER.add_notifier(GmailAPINotifier(
+#     address=GMAIL_ADDRESS))
 
 # option 2: wechat notification via ServerChan
 # uncomment below and configure to enable
@@ -131,7 +137,6 @@ NOTIFIER.add_notifier(SMTPGmailNotifier(
 # LOGFILE_FILEPATH = # put filepath string here (see README)
 # NOTIFIER.add_notifier(LogFileNotifier(
 #    filepath=LOGFILE_FILEPATH))
-
 
 
 # let's get to it!
