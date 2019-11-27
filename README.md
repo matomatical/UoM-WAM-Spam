@@ -67,23 +67,24 @@ There are some other configuration options, all documented in the script itself.
 The script can notify you using a range of notification methods. Each requires
 its own configuration, as explained below:
 
-#### Student email (default)
+* #### Student email (default)
 
-The default notifcation method. The script will log in to your university email
-account and send you a self-email notifying you about the WAM/results change.
+   The default notifcation method. The script will log in to your university
+   email account and send you a self-email notifying you about the WAM/results
+   change.
 
-This option requires no additional configuration, but if you see an error (or
-similar):
-`smtplib.SMTPAuthenticationError: (535, b'5.7.8 Username and Password not accepted')`
-then Google must be blocking the script's attempt to log into your SMTP server.
-This is because Google thinks the way the script logs into your account does not
-meet their security standards.  One work-around is to go to: [your Google
-security settings](https://myaccount.google.com/u/2/lesssecureapps?pageId=none)
-and turn on the option to "allow less secure apps".
-You might like to remember to turn it off when you get your results.
+   This option requires no additional configuration, but if you see an error
+   (or similar):
+   `smtplib.SMTPAuthenticationError: (535, b'5.7.8 Username and Password not accepted')`
+   then Google must be blocking the script's attempt to log into your SMTP
+   server. This is because Google thinks the way the script logs into your
+   account does not meet their security standards.
+   One work-around is to go to: [your Google security settings](https://myaccount.google.com/u/2/lesssecureapps?pageId=none)
+   and turn on the option to "allow less secure apps".
+   You might like to remember to turn it off when you get your results.
 
-The following notification method is a more secure workaround, with a few more
-configuration steps.
+   The following notification method is a more secure workaround, with a few
+   more configuration steps.
 
 
 #### Student email (Gmail with OAuth authentication)
