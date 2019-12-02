@@ -151,3 +151,44 @@ def results_diff(before, after):
         diff_results.append(result)
     diff["results"] = diff_results
     return diff, mood
+
+
+def resolve_wam(results):
+    if results['wam'] is None:
+        # no results in calculation yet
+        return None
+    published_wam = float(results['wam'])
+    aggregate_mark, total_credits = aggregate_results(results['results'])
+    calculated_wam = aggregate_mark / total_credits if total_credits else None
+    if calculated_wam is not None and f'{calculated_wam:.3f}' != results['wam']:
+        print('average of published results differs from published wam')
+        # TODO: We could also track the date of the calculation change to pick up
+        # when it is recalculated even if it doesn't actually change
+    # try some hypothetical scenarios and see if we can explain the published wam:
+    for extra_subjects, extra_credits in [(1,12.5), (2,25), (3,37.5), (4,50)]:
+        hypothetical_aggregate = published_wam * (total_credits + extra_credits)
+        # TODO: We may be able to remove rounding errors in hypotehtical_aggregate
+        # by rounding to the nearest multiple of 12.5 (or, to be safe, 6.25 or
+        # 3.125, since some unimelb subjects are smaller). for now, ignore this.
+        discrepancy_in_aggregate = hypothetical_aggregate - aggregate_mark
+        missing_mark = discrepancy_in_aggregate / extra_credits
+        if integerish(missing_mark * extra_subjects, tolerance=0.005):
+            print('could be', extra_credits, 'more credit points with an average mark of', round(missing_mark, 2))
+# TODO: Somehow hook this up to the messages.
+
+def aggregate_results(results_list):
+    aggregate_mark = 0
+    total_credits = 0
+    for result in results_list:
+        credits = float(result['credits'])
+        try:
+            mark = int(result['mark'])
+        except:
+            # not all subjects in the list will have a mark
+            continue
+        aggregate_mark += mark * credits
+        total_credits += credits
+    return aggregate_mark, total_credits
+
+def integerish(value, tolerance=0.01):
+    return abs(round(value) - value) <= tolerance
