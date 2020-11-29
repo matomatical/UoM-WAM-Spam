@@ -253,7 +253,7 @@ with an overly dramatic error message.  Please see these possible errors:
 You might have typed your username or password wrong.
 Please check that you got them right, and try again.
 
-### Contributions
+## Contributions
 
 This app is more useful and robust as a result of our contributors' efforts,
 and we welcome new contributions. This is also a very simple app with a low
@@ -262,13 +262,17 @@ beginning/intermediate programmers.
 (Matt is also grateful for the contributions of more experienced developers,
 which have helped to shape this app.)
 
-Note: Most activity happens on this repository semesterly, in the weeks
-leading up to the official results release date. This is a great time to
-contribute!
+Notes:
+
+* Most activity happens on this repository semesterly, in the weeks leading
+  up to the official results release date. This is a great time to contribute!
+* This project uses the MIT license. You should be comfortable with your
+  contributions being available under this licence. If you are not, please
+  raise an 'issue'.
 
 Happy hacking :).
 
-#### New integrations
+### New integrations
 
 Are we missing your favourite messaging app that supports automation?
 We welcome pull requests adding new integrations, as long they contain
@@ -292,15 +296,15 @@ The steps involved to make a contribution are:
 4. Open a pull request straight into this repo's 'master' branch
 5. Wait for Matt to review and merge the changes, or suggest improvements
 
-Good luck!
+Good luck! And feel free to ask for help with any of these steps.
 
-#### Other suggestions
+### Other suggestions
 
 Do you see some other way to improve this app? You can start a discussion by
 creating an 'issue' and making your case! Alternatively, you can just fork the
 app and make your change!
 
-#### Ideas
+### Ideas
 
 Existing ideas for improvements:
 
