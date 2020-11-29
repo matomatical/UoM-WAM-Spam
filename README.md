@@ -193,6 +193,22 @@ its own configuration, as explained below:
    into the script (you can hard-code it into `wamspam.py`, or add code to read
    it from a file or environment variable or standard input, for example).
 
+* #### Slack webhook
+   
+   The script will trigger a slack webhook which you can configure for your personal message channel. 
+   
+   In order to enable slack webhook integration, you need to follow below steps:
+   
+   - Create or choose the slack workspace you wish to connect
+   - Open the [Slack App Directory](https://slack.com/apps), and find *Incoming WebHooks*.
+   - Now, choose the channel or conversation you want to integrate and click on *Add Incoming WebHooks Integration*.
+   - In the next view, you can customize the integration as you wish (don’t forget to Save if you do make any changes). 
+   You can customize name, icon and labels as per your requirements. 
+   Also, find the Webhook URL – copy this, as you will need it in the next step. 
+   - Uncomment `option 8` in the `wamspam.py` and add your copied webhook url in the `SLACK_APP_WEBHOOK` variable.
+   
+   Your webhook should be integrated now and you should receive messages as expected in your selected slack channel.
+
 #### Multiple notification methods
 
 The script can combine multiple notification methods in its attempt to reach
