@@ -310,3 +310,9 @@ Existing ideas for improvements:
 
 * It should be possible to have this app perform inference over hidden results
   based on changes in the WAM. See issue #17.
+* The MultiNotifier should probably print the message being sent ONCE, and supress
+  the print statements from its constituent notifiers. Or the script should be the
+  one to print these messages? Think about this. Anyway the key issue is that it
+  seems a script with an empty multi-notifier should still print the messages
+  being 'sent' nowhere and a multi-notifier with more than one notifier should only
+  print the same message being sent once.
