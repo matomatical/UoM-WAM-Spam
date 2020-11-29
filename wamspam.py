@@ -138,6 +138,12 @@ NOTIFIER.add_notifier(SMTPGmailNotifier(
 # NOTIFIER.add_notifier(LogFileNotifier(
 #    filepath=LOGFILE_FILEPATH))
 
+# option 8: push notification via slack incoming webhooks
+# uncomment below and configure to enable
+# from notify.by_slack import SlackAppNotifier
+# SLACK_APP_WEBHOOK = # put webhook key string here (see README)
+# NOTIFIER.add_notifier(SlackAppNotifier(
+#    hook_url=SLACK_APP_WEBHOOK))
 
 # let's get to it!
 
