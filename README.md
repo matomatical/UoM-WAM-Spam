@@ -252,3 +252,57 @@ with an overly dramatic error message.  Please see these possible errors:
 
 You might have typed your username or password wrong.
 Please check that you got them right, and try again.
+
+### Contributions
+
+This app is more useful and robust as a result of our contributors' efforts,
+and we welcome new contributions. This is also a very simple app with a low
+barrier to contribution, so a great first open source project to work on for
+beginning/intermediate programmers.
+(Matt is also grateful for the contributions of more experienced developers,
+which have helped to shape this app.)
+
+Note: Most activity happens on this repository semesterly, in the weeks
+leading up to the official results release date. This is a great time to
+contribute!
+
+Happy hacking :).
+
+#### New integrations
+
+Are we missing your favourite messaging app that supports automation?
+We welcome pull requests adding new integrations, as long they contain
+clear and complete instructions for anyone to be able to configure the
+method.
+
+The requirements are:
+
+1. Adding the implementation of the notification method to the `notify`
+   directory.
+2. Configuring the notification method atop the main script.
+3. Adding configuration instructions to the README.
+
+There are plenty of examples to follow in each of these places.
+
+The steps involved to make a contribution are:
+
+1. Fork this repository
+2. Work in your fork, in whichever branch(es) you prefer
+3. Test your integration and instructions
+4. Open a pull request straight into this repo's 'master' branch
+5. Wait for Matt to review and merge the changes, or suggest improvements
+
+Good luck!
+
+#### Other suggestions
+
+Do you see some other way to improve this app? You can start a discussion by
+creating an 'issue' and making your case! Alternatively, you can just fork the
+app and make your change!
+
+#### Ideas
+
+Existing ideas for improvements:
+
+* It should be possible to have this app perform inference over hidden results
+  based on changes in the WAM. See issue #17.
