@@ -199,7 +199,7 @@ its own configuration, as explained below:
    
    In order to enable slack webhook integration, you need to follow below steps:
    
-   - Create or choose the slack workspace you wish to connect
+   - Create or choose the slack workspace you wish to connect.
    - Open the [Slack App Directory](https://slack.com/apps), and find *Incoming WebHooks*.
    - Now, choose the channel or conversation you want to integrate and click on *Add Incoming WebHooks Integration*.
    - In the next view, you can customize the integration as you wish (don’t forget to Save if you do make any changes). 
