@@ -6,6 +6,7 @@ update, and then send the student a notification if anything changed
 """
 import json
 import time
+from datetime import datetime
 import getpass
 
 import requests
@@ -159,9 +160,15 @@ def main():
     poll_and_notify()
 
     while CHECK_REPEATEDLY:
+        # print out current time for easy reference
+        print("Completed a check at", datetime.now().strftime("%H:%M:%S"))
         print("Sleeping", DELAY_BETWEEN_CHECKS, "minutes before next check.")
-        time.sleep(DELAY_BETWEEN_CHECKS * 60) # seconds
-        print("Waking up!")
+        print("--------------------------------------")
+        # execute sleep
+        time.sleep(DELAY_BETWEEN_CHECKS * 60) # seconds        
+        # time to wake up!
+        print("Waking up at", datetime.now().strftime("%H:%M:%S"))
+
         try:
             poll_and_notify()
         except Exception as e:
