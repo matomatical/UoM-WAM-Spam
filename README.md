@@ -16,7 +16,7 @@ compulsively checking the results page yourself!
 Or is it just me who does that?
 
 Made with :purple_heart: by Matt, with contributions from CaviarChen,
-blueset, josephsurin, alanung, and abhinavcreed13.
+blueset, josephsurin, alanung, abhinavcreed13, and zcduthie.
 
 
 ## Installation

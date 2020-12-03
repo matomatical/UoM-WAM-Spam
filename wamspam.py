@@ -160,13 +160,10 @@ def main():
     poll_and_notify()
 
     while CHECK_REPEATEDLY:
-        # print out current time for easy reference
         print("Completed a check at", datetime.now().strftime("%H:%M:%S"))
         print("Sleeping", DELAY_BETWEEN_CHECKS, "minutes before next check.")
         print("--------------------------------------")
-        # execute sleep
         time.sleep(DELAY_BETWEEN_CHECKS * 60) # seconds        
-        # time to wake up!
         print("Waking up at", datetime.now().strftime("%H:%M:%S"))
 
         try:
