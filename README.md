@@ -301,8 +301,11 @@ Good luck! And feel free to ask for help with any of these steps.
 ### Other suggestions
 
 Do you see some other way to improve this app? You can start a discussion by
-creating an 'issue' and making your case! Alternatively, you can just fork the
-app and make your change!
+creating an 'issue' and making your case for the improvement! If we agree,
+we'll invite you to make a pull request.
+
+(In the mean time, you can make the change in your own fork of the app, and
+use this version to look out for your results).
 
 ### Ideas
 
