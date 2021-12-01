@@ -293,7 +293,7 @@ The steps involved to make a contribution are:
 1. Fork this repository
 2. Work in your fork, in whichever branch(es) you prefer
 3. Test your integration and instructions
-4. Open a pull request straight into this repo's 'master' branch
+4. Open a pull request straight into this repo's 'main' branch
 5. Wait for Matt to review and merge the changes, or suggest improvements
 
 Good luck! And feel free to ask for help with any of these steps.
